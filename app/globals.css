@@ -4,9 +4,21 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/*
+ * AdFund Global design tokens.
+ *
+ * The product is a single-theme "emerald on near-black" institutional CRM:
+ * a light content canvas (#f8faf9) holding white cards, with a permanently
+ * dark sidebar and a handful of dark "hero" surfaces for KPI emphasis. There
+ * is no dark-mode toggle in the admin app by design, so the shadcn `.dark`
+ * block below is kept for completeness but is never activated at runtime
+ * (see components/theme-provider.tsx, which forces the light theme).
+ */
 @theme inline {
     --font-heading: var(--font-sans);
-    --font-sans: var(--font-sans);
+    --font-sans: var(--font-jakarta);
+    --font-mono: var(--font-jetbrains);
+
     --color-sidebar-ring: var(--sidebar-ring);
     --color-sidebar-border: var(--sidebar-border);
     --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -45,28 +57,54 @@
     --radius-2xl: calc(var(--radius) * 1.8);
     --radius-3xl: calc(var(--radius) * 2.2);
     --radius-4xl: calc(var(--radius) * 2.6);
+
+    /* Brand surfaces — the emerald-on-near-black identity. Named once here so
+     * components use `bg-brand-ink` etc. instead of scattering raw hex values
+     * (arbitrary-value classes) across every screen. */
+    --color-brand-canvas: var(--brand-canvas);
+    --color-brand-ink: var(--brand-ink);
+    --color-brand-ink-hover: var(--brand-ink-hover);
+    --color-brand-card: var(--brand-card);
+    --color-brand-panel: var(--brand-panel);
+    --color-brand-panel-2: var(--brand-panel-2);
+    --color-brand-panel-3: var(--brand-panel-3);
+    --color-brand-active: var(--brand-active);
+    --color-brand-mint: var(--brand-mint);
+    --color-brand-glow: var(--brand-glow);
+
+    /* Chart series colors, reused by Recharts via CSS var lookups. */
+    --color-chart-volume: var(--chart-volume);
+    --color-chart-secondary: var(--chart-secondary);
+    --color-chart-line: var(--chart-line);
+
+    /* Signature oversized card radii used throughout the source design. */
+    --radius-card: 24px;
+    --radius-panel: 22px;
 }
 
 :root {
-    --background: oklch(1 0 0);
-    --foreground: oklch(0.145 0 0);
+    /* Retuned shadcn tokens: nudge the neutral base toward the brand so every
+     * generated shadcn primitive (Input, Select, Dialog, Switch, ...) reads
+     * as part of the same product instead of generic gray. */
+    --background: oklch(0.985 0.006 165);
+    --foreground: oklch(0.19 0.02 250);
     --card: oklch(1 0 0);
-    --card-foreground: oklch(0.145 0 0);
+    --card-foreground: oklch(0.19 0.02 250);
     --popover: oklch(1 0 0);
-    --popover-foreground: oklch(0.145 0 0);
-    --primary: oklch(0.205 0 0);
+    --popover-foreground: oklch(0.19 0.02 250);
+    --primary: oklch(0.19 0.03 165);
     --primary-foreground: oklch(0.985 0 0);
-    --secondary: oklch(0.97 0 0);
-    --secondary-foreground: oklch(0.205 0 0);
-    --muted: oklch(0.97 0 0);
-    --muted-foreground: oklch(0.556 0 0);
-    --accent: oklch(0.97 0 0);
-    --accent-foreground: oklch(0.205 0 0);
-    --destructive: oklch(0.577 0.245 27.325);
-    --border: oklch(0.922 0 0);
-    --input: oklch(0.922 0 0);
-    --ring: oklch(0.708 0 0);
-    --chart-1: oklch(0.87 0 0);
+    --secondary: oklch(0.96 0.01 165);
+    --secondary-foreground: oklch(0.21 0.02 250);
+    --muted: oklch(0.96 0.008 165);
+    --muted-foreground: oklch(0.5 0.02 250);
+    --accent: oklch(0.955 0.035 165);
+    --accent-foreground: oklch(0.32 0.09 165);
+    --destructive: oklch(0.62 0.21 17);
+    --border: oklch(0.92 0.006 165);
+    --input: oklch(0.92 0.006 165);
+    --ring: oklch(0.72 0.15 162);
+    --chart-1: oklch(0.72 0.15 162);
     --chart-2: oklch(0.556 0 0);
     --chart-3: oklch(0.439 0 0);
     --chart-4: oklch(0.371 0 0);
@@ -80,9 +118,26 @@
     --sidebar-accent-foreground: oklch(0.205 0 0);
     --sidebar-border: oklch(0.922 0 0);
     --sidebar-ring: oklch(0.708 0 0);
+
+    /* Brand raw values — the exact hex surfaces from the reference design. */
+    --brand-canvas: #f8faf9;
+    --brand-ink: #0c1410;
+    --brand-ink-hover: #15221b;
+    --brand-card: #0b130f;
+    --brand-panel: #121c17;
+    --brand-panel-2: #14221a;
+    --brand-panel-3: #16241e;
+    --brand-active: #1b2b22;
+    --brand-mint: #e4ede7;
+    --brand-glow: rgba(16, 185, 129, 0.35);
+    --chart-volume: #10b981;
+    --chart-secondary: #d1fae5;
+    --chart-line: #059669;
 }
 
 .dark {
+    /* Unused in the admin app (theme is forced light) — kept so shadcn
+     * components remain correct if dark mode is ever re-enabled later. */
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);
     --card: oklch(0.205 0 0);
@@ -121,9 +176,45 @@
     @apply border-border outline-ring/50;
     }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-brand-canvas text-foreground;
     }
   html {
     @apply font-sans;
     }
+  ::selection {
+    @apply bg-emerald-500 text-white;
+    }
+}
+
+/* Slim emerald-tinted scrollbars, used across scrollable panels/timelines. */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.2);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.4);
+}
+
+@layer utilities {
+  /* Ambient radial-glow background for dark hero surfaces (auth panel, etc). */
+  .emerald-ambient-mesh {
+    background:
+      radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.18) 0%, transparent 40%),
+      radial-gradient(circle at 90% 10%, rgba(5, 150, 105, 0.15) 0%, transparent 45%),
+      radial-gradient(circle at 50% 80%, rgba(4, 120, 87, 0.22) 0%, transparent 50%),
+      #07160f;
+  }
+  .emerald-glow-sm {
+    box-shadow: 0 0 15px -2px rgba(16, 185, 129, 0.35);
+  }
+  .emerald-glow-lg {
+    box-shadow: 0 0 35px -5px rgba(16, 185, 129, 0.3);
+  }
 }

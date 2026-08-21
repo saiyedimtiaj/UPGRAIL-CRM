@@ -1,15 +1,27 @@
-import { Geist, Geist_Mono } from "next/font/google"
+import type { Metadata } from "next"
+import { Plus_Jakarta_Sans, JetBrains_Mono } from "next/font/google"
 
 import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils";
+import { Providers } from "@/components/providers"
+import { cn } from "@/lib/utils"
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'})
-
-const fontMono = Geist_Mono({
+const fontJakarta = Plus_Jakarta_Sans({
   subsets: ["latin"],
-  variable: "--font-mono",
+  variable: "--font-jakarta",
+  display: "swap",
 })
+
+const fontJetBrains = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-jetbrains",
+  display: "swap",
+})
+
+export const metadata: Metadata = {
+  title: "AdFund Global — Institutional FX & Ad Treasury",
+  description:
+    "Institutional USD/BDT/USDT ad funding & spread CRM with automated rate finalization, multi-tier ledger management, reconciliation, and audited profit tracking.",
+}
 
 export default function RootLayout({
   children,
@@ -20,10 +32,14 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", geist.variable)}
+      className={cn(
+        fontJakarta.variable,
+        fontJetBrains.variable,
+        "antialiased"
+      )}
     >
-      <body>
-        <ThemeProvider>{children}</ThemeProvider>
+      <body className="font-sans" suppressHydrationWarning>
+        <Providers>{children}</Providers>
       </body>
     </html>
   )
