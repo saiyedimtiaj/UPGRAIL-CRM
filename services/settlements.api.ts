@@ -24,7 +24,6 @@ export interface AllocationProposalRow {
   allocated_usdt: number
 }
 
-/** Spec §7.4, §16.2: FIFO preview before confirming a settlement. */
 export async function previewAllocation(
   sellerId: number,
   usdtAmount: number,
@@ -46,8 +45,7 @@ export interface CreateSettlementPayload {
   usdtAmount: number
   paidBy?: number
   note?: string
-  /** Owner/Partner override of the FIFO proposal (spec §7.4). Omit to
-   *  accept the FIFO proposal as-is. */
+
   allocations?: AllocationOverride[]
 }
 

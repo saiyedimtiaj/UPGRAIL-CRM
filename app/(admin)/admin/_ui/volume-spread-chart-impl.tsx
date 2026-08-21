@@ -15,8 +15,6 @@ import {
 import type { TimeSeriesPoint, TimeSeriesRange } from "@/lib/types"
 import { ChartTooltip } from "@/app/(admin)/admin/_ui/chart-tooltip"
 
-// Two Y axes: volume is in tens of thousands of USD while spread is a
-// single-digit percentage. Sharing one axis pins the spread line flat.
 export function VolumeSpreadChartImpl({
   points,
   range,
@@ -69,7 +67,7 @@ export function VolumeSpreadChartImpl({
           tickLine={false}
           axisLine={false}
           tickMargin={10}
-          // A 30-day range would otherwise overlap every label.
+
           interval={range === "monthly" ? 4 : 0}
         />
 

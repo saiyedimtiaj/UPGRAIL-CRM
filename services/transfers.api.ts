@@ -28,7 +28,7 @@ export interface CreateTransferPayload {
   amountBdt: number
   reference?: string
   note?: string
-  /** Required only for a Profit Bank -> UpGrail reversal (spec §10.1). */
+
   reason?: string
 }
 

@@ -13,10 +13,6 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Bdt } from "@/components/primitives/money"
 
-// Spec §10/§13.4: "taking out profit" is a UpGrail Bank -> Profit Bank
-// transfer. It never reduces Total Earned Profit — it only moves already-
-// earned money from Profit Remaining into Profit Taken Out. The backend
-// enforces the §12 safety rule (cannot exceed Profit Remaining).
 export function WithdrawalForm() {
   const { data: metrics } = useMetrics()
   const createTransfer = useCreateTransfer()

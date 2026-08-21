@@ -21,8 +21,7 @@ export interface DataTableColumn<T> {
   header: string | React.ReactNode
   cell: (row: T) => React.ReactNode
   sortField?: string
-  /** Hides the column below this breakpoint; only matters once a `mobileCard`
-   *  renderer is supplied, otherwise the table scrolls horizontally instead. */
+
   hideBelow?: "sm" | "md" | "lg" | "xl" | "2xl"
   align?: "left" | "center" | "right"
   headerClassName?: string
@@ -50,7 +49,7 @@ export interface DataTableProps<T> {
   skeletonRows?: number
   emptyState?: React.ReactNode
   entityLabel?: string
-  /** Renders each row as a card below `md` instead of a horizontally-scrolled row. */
+
   mobileCard?: (row: T) => React.ReactNode
   rowClassName?: (row: T) => string
   footerLeft?: React.ReactNode

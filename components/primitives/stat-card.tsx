@@ -9,14 +9,13 @@ import { cn } from "@/lib/utils"
 import { countUpTransition } from "@/lib/animations"
 
 interface StatCardProps {
-  /** dark = near-black hero card, light = white card, mint = the pale-green
-   *  emphasis card (matches the reference image's 4-KPI-card row exactly). */
+
   tone?: "dark" | "light" | "mint"
   icon?: LucideIcon
   label: string
-  /** Numeric value to count up to. Formatted via `format`. */
+
   value: number
-  /** Formats the animated numeric value into display text, e.g. `(n) => bdt(n)`. */
+
   format?: (n: number) => string
   delta?: { direction: "up" | "down"; label: string }
   sparkline?: React.ReactNode
@@ -24,7 +23,6 @@ interface StatCardProps {
   className?: string
 }
 
-/** Animates a plain number from 0 up to `value` over countUpTransition. */
 function useCountUp(value: number) {
   const motionValue = useMotionValue(0)
   const [display, setDisplay] = React.useState(0)
@@ -35,7 +33,7 @@ function useCountUp(value: number) {
       onUpdate: (v) => setDisplay(v),
     })
     return () => controls.stop()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [value])
 
   return display
@@ -47,12 +45,6 @@ const ICON_WRAP: Record<NonNullable<StatCardProps["tone"]>, string> = {
   mint: "bg-white/70 text-emerald-800 ring-1 ring-emerald-900/10",
 }
 
-/**
- * The dashboard's signature KPI card — dark / light / mint variants. Each
- * card carries a small icon badge, a large count-up figure, an optional
- * trend delta, and an optional footer slot — a deliberately premium,
- * editorial layout rather than a bare number-in-a-box.
- */
 export function StatCard({
   tone = "light",
   icon: Icon,

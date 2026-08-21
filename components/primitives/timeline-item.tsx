@@ -11,9 +11,7 @@ interface TimelineItemProps {
   amount: number
   direction: "in" | "out"
   status?: Status
-  /** Optional row-actions slot (e.g. shared/RowActions) — used on the
-   *  Client/Seller ledger timelines so a payment can be edited or removed
-   *  without leaving the party's statement view. */
+
   actions?: React.ReactNode
 }
 
@@ -27,8 +25,6 @@ const ICON_TONE_CLASSES: Record<
   amber: "bg-amber-50 text-amber-600",
 }
 
-/** One row of the merged trade/payment timeline shown on the Client and
- *  Seller ledger detail panes. */
 export function TimelineItem({
   icon,
   iconTone = "blue",

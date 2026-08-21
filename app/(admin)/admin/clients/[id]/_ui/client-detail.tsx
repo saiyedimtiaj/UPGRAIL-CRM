@@ -30,11 +30,6 @@ import { Button } from "@/components/ui/button"
 import { ClientTradesCard } from "./client-trades-card"
 import { ClientPaymentsCard } from "./client-payments-card"
 
-// Purely-frontend totals: table queries paginate at PAGE_SIZE, so summing
-// only the loaded page would show a number that changes as you page. This
-// separate limit:500 query (same approach as client-ledger.tsx) caches
-// independently and exists only to feed the stat cards.
-// TODO(backend): once GET /clients/:id returns aggregate totals, drop this.
 const TOTALS_LIMIT = 500
 
 export function ClientDetail({ id }: { id: number }) {

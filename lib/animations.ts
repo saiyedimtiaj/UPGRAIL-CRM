@@ -1,9 +1,5 @@
 import type { Transition, Variants } from "motion/react"
 
-/** `MotionConfig reducedMotion="user"` is set once at the app root
- *  (components/providers.tsx), so variants here automatically respect
- *  `prefers-reduced-motion` with no extra code. */
-
 export const EASE: Transition["ease"] = [0.22, 1, 0.36, 1]
 
 export const pageVariants: Variants = {
@@ -53,5 +49,4 @@ export const NAV_INDICATOR_ID = "sidebar-nav-indicator"
 
 export const countUpTransition: Transition = { duration: 0.8, ease: EASE }
 
-/** Caps staggered rows — a 200-row table would otherwise take ~10s to animate in. */
 export const MAX_STAGGER_ITEMS = 15

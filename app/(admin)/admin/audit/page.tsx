@@ -16,7 +16,6 @@ export default function AuditPage() {
 
   const debouncedSearch = useDebouncedValue(search)
 
-  // Filter changes reset to page 1 so a narrowed result set isn't left on a stale page.
   function handleSearchChange(value: string) {
     setSearch(value)
     setPage(1)

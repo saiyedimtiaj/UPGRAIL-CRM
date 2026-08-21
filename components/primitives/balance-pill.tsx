@@ -1,7 +1,6 @@
 import { cn } from "@/lib/utils"
 import { bdt } from "@/lib/format"
 
-/** `onDark` lightens the "settled" label so it stays legible on a dark background. */
 export function BalancePill({
   balance,
   onDark = false,

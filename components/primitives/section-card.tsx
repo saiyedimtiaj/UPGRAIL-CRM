@@ -2,7 +2,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 interface SectionCardProps extends Omit<React.ComponentProps<"div">, "title"> {
-  /** "light" = white card (default). "dark" = near-black hero surface for emphasis. */
+
   variant?: "light" | "dark"
   title?: React.ReactNode
   subtitle?: React.ReactNode

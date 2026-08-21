@@ -134,10 +134,6 @@ export const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   },
 }
 
-/** Detail routes whose last segment is a record id, keyed by the parent
- *  route. Matched only when the trailing segment is numeric, so a future
- *  static child (e.g. /admin/clients/import) still falls through to an
- *  exact PAGE_META lookup instead of picking this up by accident. */
 const DYNAMIC_PAGE_META: Record<string, { title: string; subtitle: string }> = {
   "/admin/clients": {
     title: "Client Details",
@@ -149,11 +145,6 @@ const DYNAMIC_PAGE_META: Record<string, { title: string; subtitle: string }> = {
   },
 }
 
-/** Resolves the topbar title for a pathname. Exact PAGE_META keys always
- *  win first — this only ever adds a fallback for `${parent}/${numericId}`,
- *  so every existing route (including /admin/settings/* sub-routes, which
- *  intentionally fall back to the Dashboard entry) keeps behaving exactly
- *  as before. */
 export function resolvePageMeta(pathname: string): { title: string; subtitle: string } {
   const exact = PAGE_META[pathname]
   if (exact) return exact

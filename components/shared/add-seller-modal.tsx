@@ -12,8 +12,6 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 
-// Keyed by target identity in the wrapper below so switching edit targets
-// gets fresh local state on mount instead of an effect re-syncing fields.
 function SellerForm({
   mode,
   initial,

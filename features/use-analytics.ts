@@ -17,7 +17,6 @@ export const useBalances = () =>
     queryFn: analyticsApi.getBalances,
   })
 
-/** Keyed by range so weekly/monthly/yearly cache independently. */
 export const useTimeSeries = (range: TimeSeriesRange) =>
   useQuery({
     queryKey: [QK.metrics, "timeseries", range],

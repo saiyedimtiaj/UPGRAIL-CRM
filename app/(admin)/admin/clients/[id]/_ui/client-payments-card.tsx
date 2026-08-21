@@ -19,8 +19,6 @@ import { LogPaymentModal } from "@/components/shared/log-payment-modal"
 import { shortDate } from "@/lib/date"
 import type { Payment } from "@/lib/types"
 
-// Only mounted once the parent has confirmed `clientId` is valid — see the
-// same guard note in client-trades-card.tsx.
 export function ClientPaymentsCard({
   clientId,
   canManage,

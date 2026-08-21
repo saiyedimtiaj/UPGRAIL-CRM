@@ -13,7 +13,6 @@ export const useTransfers = (params: TransferListParams = {}) =>
     placeholderData: keepPreviousData,
   })
 
-/** Spec §16.4 step 21: "CRM previews ledger changes" before confirming. */
 export const useTransferPreview = (
   from: MoneyDestination | undefined,
   to: MoneyDestination | undefined,

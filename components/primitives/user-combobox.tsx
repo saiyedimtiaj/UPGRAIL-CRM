@@ -13,9 +13,6 @@ interface UserComboboxProps {
   className?: string
 }
 
-/** Type-to-filter picker for team accounts (owner / partner / staff) — used
- *  wherever a specific user needs to be selected, e.g. the Settings user
- *  switcher. Shows role + email as the sublabel to disambiguate. */
 export function UserCombobox({
   users,
   value,

@@ -17,8 +17,6 @@ import { StatusBadge } from "@/components/primitives/status-badge"
 import { Bdt, Usdt } from "@/components/primitives/money"
 import type { USDTSettlement } from "@/lib/types"
 
-// Only ever mounted once the parent has confirmed `sellerId` is valid — see
-// the same guard note in client-trades-card.tsx.
 export function SellerSettlementsCard({
   sellerId,
   canManage,

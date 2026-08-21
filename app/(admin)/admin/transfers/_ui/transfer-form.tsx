@@ -20,10 +20,6 @@ const DESTINATION_OPTIONS = [
   { value: "PROFIT_BANK", label: "Profit Bank" },
 ]
 
-// Spec §10: a dedicated Owner/Partner action moving already-recognized
-// value between the three destinations. §16.4 step 21: the CRM previews
-// the ledger effect before the transfer is confirmed. §10.1 requires a
-// reason when reversing money out of Profit Bank back to UpGrail Bank.
 export function TransferForm() {
   const createTransfer = useCreateTransfer()
   const fireConfetti = useConfetti()

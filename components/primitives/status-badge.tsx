@@ -25,8 +25,6 @@ const STATUS_META: Record<Status, { label: string; className: string }> = {
   },
 }
 
-/** Small colour-coded pill used across trades/settlements/ledgers for a
- *  finalized / pending / voided / settled state. */
 export function StatusBadge({
   status,
   className,

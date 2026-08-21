@@ -7,8 +7,6 @@ import { LiquidityWarning } from "@/app/(admin)/admin/profit/_ui/liquidity-warni
 import { WithdrawalForm } from "@/app/(admin)/admin/profit/_ui/withdrawal-form"
 import { WithdrawalHistory } from "@/app/(admin)/admin/profit/_ui/withdrawal-history"
 
-// Gated for staff without profit visibility; owners/partners always have
-// access. A staff member's canViewProfit flag is toggled from Settings.
 export default function ProfitPage() {
   const { data: me } = useMe()
 

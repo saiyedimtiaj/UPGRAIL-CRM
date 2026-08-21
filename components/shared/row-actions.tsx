@@ -15,7 +15,7 @@ export interface RowAction {
   label: string
   icon?: LucideIcon
   onSelect: () => void
-  /** Renders in rose/destructive styling and gets a separator above it. */
+
   destructive?: boolean
   disabled?: boolean
 }

@@ -9,10 +9,6 @@ interface TradePreviewStripProps {
   conduitUsdtRate?: number
 }
 
-/** Spec §6.2, §13.1: a live, read-only preview — never sent to the server,
- *  just mirrors what the backend will compute. External-seller cost/profit
- *  is intentionally never previewed here (§6.3: it must come from an actual
- *  settlement, not a guess at trade-entry time). */
 export function TradePreviewStrip({
   usdAmount,
   cardRate,

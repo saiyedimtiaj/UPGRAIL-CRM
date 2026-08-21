@@ -46,7 +46,7 @@ export const useUpdateClient = () => {
       clientsApi.updateClient(id, payload),
     onSuccess: async () => {
       await invalidate()
-      // active flag affects trade-entry comboboxes and balances
+
       await invalidateFinancials(qc)
     },
   })

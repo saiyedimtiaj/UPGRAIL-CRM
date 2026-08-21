@@ -13,15 +13,8 @@ export const QK = {
   metrics: "metrics",
   balances: "balances",
   settings: "settings",
-  notifications: "notifications",
 } as const
 
-/**
- * A rate write can retroactively finalize pending trades/settlements, so any
- * financial mutation invalidates this whole set instead of just its own
- * entity — hand-picking per mutation risks stale money left on screen.
- * Callers should still invalidate their own entity if it's not listed here.
- */
 export function invalidateFinancials(queryClient: QueryClient) {
   return Promise.all([
     queryClient.invalidateQueries({ queryKey: [QK.metrics] }),

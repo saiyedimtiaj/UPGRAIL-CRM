@@ -23,10 +23,6 @@ const ACTIVE_OPTIONS = [
   { value: "false", label: "Deactivated Only" },
 ]
 
-// rate_type no longer affects pricing (spec §6.2 — Card Rate is entered per
-// transaction for every seller) but the field/filter still exists on the
-// backend as legacy metadata, so it's kept here relabeled to avoid implying
-// it changes trade math.
 const RATE_TYPE_OPTIONS = [
   { value: "all", label: "All Sellers" },
   { value: "DIRECT", label: "Legacy: Direct" },

@@ -19,14 +19,14 @@ export interface SelectFieldOption {
 
 interface SelectFieldProps {
   value: string | undefined
-  /** Normalizes Base UI's onValueChange(value, eventDetails) to (value) => void. */
+
   onChange: (value: string) => void
   options: SelectFieldOption[]
   placeholder?: string
   disabled?: boolean
   className?: string
   id?: string
-  /** "default" = standard bordered trigger. "pill-dark" = rounded-full dark trigger for compact filters. */
+
   variant?: "default" | "pill-dark"
 }
 

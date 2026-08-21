@@ -1,12 +1,6 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios"
 
-/**
- * On the client, `withCredentials: true` sends the httpOnly access_token
- * cookie automatically. On the server, axios doesn't forward cookies, so the
- * interceptor below reads it via `next/headers` and sets Authorization
- * explicitly — but only server-side, to avoid doing it on every client call.
- * No refresh flow: a 401 outside auth endpoints just redirects to sign-in.
- */
+
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1",
   withCredentials: true,

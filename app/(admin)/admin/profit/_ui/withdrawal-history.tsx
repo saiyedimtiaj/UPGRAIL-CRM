@@ -29,8 +29,7 @@ export function WithdrawalHistory() {
   const { data: me } = useMe()
   const voidTransfer = useVoidTransfer()
   const allTransfers = data?.data ?? []
-  // This screen is specifically about Profit Bank movements — Take Out
-  // Profit (UpGrail -> Profit) and any reversal (Profit -> UpGrail).
+
   const transfers = allTransfers.filter(
     (t) => t.from_destination === "PROFIT_BANK" || t.to_destination === "PROFIT_BANK"
   )

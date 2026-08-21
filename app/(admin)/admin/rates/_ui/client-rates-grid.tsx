@@ -37,9 +37,8 @@ function ClientRateRow({
   const value = draft !== undefined ? draft : (savedValue?.toString() ?? "")
   const isDirty = draft !== undefined && Number(draft) !== savedValue
 
-  // Only queries when the field is actively being edited to a different
-  // value — a same-day correction to an already-POSTED charge is flagged
-  // before save, without firing a preview request for every untouched row.
+
+
   const { data: impact } = useRateImpactPreview(
     isDirty && Number(draft)
       ? { date, partyType: "CLIENT", partyId: clientId, kind: "DIRECT", value: Number(draft) }

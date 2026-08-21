@@ -14,8 +14,6 @@ import { Usd, Usdt } from "@/components/primitives/money"
 import { pct } from "@/lib/format"
 import type { Transaction } from "@/lib/types"
 
-// Only ever mounted once the parent has confirmed `sellerId` is valid — see
-// the same guard note in client-trades-card.tsx.
 export function SellerTradesCard({ sellerId }: { sellerId: number }) {
   const [page, setPage] = React.useState(1)
   const { data, isPending, isFetching } = useTransactions({

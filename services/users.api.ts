@@ -1,7 +1,6 @@
 import { api } from "@/lib/axios"
 import type { UserRole } from "@/lib/types"
 
-// Distinct from lib/types.ts's User (flat role: UserRole string) — that one is the trading-domain user on transactions/audit entries, not this admin surface.
 export interface TAdminUser {
   id: number
   name: string

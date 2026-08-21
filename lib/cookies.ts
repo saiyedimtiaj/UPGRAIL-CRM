@@ -2,11 +2,8 @@
 
 import { cookies } from "next/headers"
 
-/** Mirrors the backend's Set-Cookie so Server Components/middleware can read
- *  the same token without `withCredentials` (browser-only). */
-
 const ACCESS_TOKEN_COOKIE = "access_token"
-const ACCESS_TOKEN_MAX_AGE_SECONDS = 60 * 24 * 60 * 60 
+const ACCESS_TOKEN_MAX_AGE_SECONDS = 60 * 24 * 60 * 60
 
 export async function setAuthTokenAction(token: string, maxAgeSeconds?: number) {
   const cookieStore = await cookies()

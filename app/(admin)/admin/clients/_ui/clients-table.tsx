@@ -31,8 +31,6 @@ import {
 
 const EMPTY_FILTERS: ClientsFiltersState = { search: "", active: "all" }
 
-// Delete is "smart": a client referenced by any trade or payment gets
-// soft-deactivated instead of removed, so historical balances stay intact.
 export function ClientsTable() {
   const router = useRouter()
   const [page, setPage] = React.useState(1)

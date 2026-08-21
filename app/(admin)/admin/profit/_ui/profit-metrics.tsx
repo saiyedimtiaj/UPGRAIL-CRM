@@ -4,9 +4,6 @@ import { useMetrics } from "@/features/use-analytics"
 import { StatCard } from "@/components/primitives/stat-card"
 import { bdt } from "@/lib/format"
 
-// Spec §13.3/§18.1: Earned Profit counts finalized trades only — pending
-// external-seller profit never mixes in, it's shown separately as a count +
-// client-sales value so it's never mistaken for realized profit.
 export function ProfitMetrics() {
   const { data: metrics } = useMetrics()
 

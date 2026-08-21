@@ -1,7 +1,4 @@
-/**
- * Auth-related types mirroring the backend's response shapes
- * (backend/src/auth/auth.service.ts `toSafeUser`).
- */
+
 
 export interface TRole {
   id: number

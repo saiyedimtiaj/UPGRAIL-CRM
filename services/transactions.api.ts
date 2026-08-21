@@ -4,7 +4,7 @@ import type { PaginatedResponse, ProfitStatus, Transaction } from "@/lib/types"
 export interface TransactionListParams {
   page?: number
   limit?: number
-  /** Exact-day match; wins over dateFrom/dateTo. */
+
   date?: string
   dateFrom?: string
   dateTo?: string
@@ -31,7 +31,7 @@ export interface CreateTransactionPayload {
   clientId: number
   sellerId: number
   usdAmount: number
-  /** Percentage, e.g. 92.5 — required on every trade (spec §6.1). */
+
   cardRate: number
   date?: string
   clientRate?: number

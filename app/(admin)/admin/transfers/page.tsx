@@ -5,8 +5,6 @@ import { LockScreen } from "@/components/primitives/lock-screen"
 import { TransferForm } from "@/app/(admin)/admin/transfers/_ui/transfer-form"
 import { TransfersTable } from "@/app/(admin)/admin/transfers/_ui/transfers-table"
 
-// Backend restricts /transfers to Owner/Partner (spec §10 — a dedicated
-// Owner/Partner action), so gate the screen the same way.
 export default function TransfersPage() {
   const { data: me } = useMe()
 

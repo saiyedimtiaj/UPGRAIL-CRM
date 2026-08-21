@@ -29,7 +29,6 @@ interface LogPaymentModalProps {
   initial?: Payment
 }
 
-
 function PaymentForm({
   fixedPartyType,
   fixedPartyId,
@@ -79,16 +78,14 @@ function PaymentForm({
     initial?.destination ?? "UPGRAIL_BANK"
   )
 
-  // Derived, not state: falls back to the loaded default until the user
-  // explicitly touches the field, so no sync effect is needed.
+
   const method = methodTouched ? rawMethod : rawMethod || settings?.defaultPaymentMethod || ""
   function setMethod(value: string) {
     setMethodTouched(true)
     setRawMethod(value)
   }
 
-  // rate_type is cosmetic under v3.0 — any seller can be the party on a
-  // BDT payment (spec has no per-seller pricing-model gate on payments).
+
   const paymentEligibleSellers = sellers
 
   const partyName =
@@ -254,7 +251,6 @@ function PaymentForm({
     </form>
   )
 }
-
 
 export function LogPaymentModal({
   open,

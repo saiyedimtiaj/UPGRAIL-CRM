@@ -6,7 +6,6 @@ import { setAuthTokenAction, removeAuthTokenAction } from "@/lib/cookies"
 
 const AUTH_KEY = "auth"
 
-/** A 401 here means "not signed in", not an error to surface. */
 export const useMe = () =>
   useQuery({
     queryKey: [AUTH_KEY, "me"],
@@ -20,13 +19,12 @@ export const useSignIn = () => {
   return useMutation({
     mutationFn: authApi.signIn,
     onSuccess: async (data) => {
-      // Mirrors token into a cookie so RSC layouts/middleware can read the session too (see lib/axios.ts).
+
       await setAuthTokenAction(data.access_token, data.expiresInSeconds)
       qc.setQueryData([AUTH_KEY, "me"], data.user)
     },
   })
 }
-
 
 export const useLogout = () => {
   const qc = useQueryClient()

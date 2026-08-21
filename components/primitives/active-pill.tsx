@@ -1,7 +1,5 @@
-// Clients/Sellers don't share StatusBadge's finalized/pending/voided
-// vocabulary, hence a small dedicated badge instead of stretching that
-// component to fit. Shared by the Clients/Sellers tables and their detail
-// pages so the active/deactivated treatment stays in exactly one place.
+
+
 export function ActivePill({ active }: { active: boolean }) {
   return (
     <span

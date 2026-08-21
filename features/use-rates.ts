@@ -18,8 +18,6 @@ export const useRateHistory = (params: RateHistoryParams = {}) =>
     placeholderData: keepPreviousData,
   })
 
-/** Spec: a same-day rate correction can silently rewrite an already-
- *  POSTED/FINALIZED number — this lets the form warn before submit. */
 export const useRateImpactPreview = (
   params: Parameters<typeof ratesApi.previewRateImpact>[0] | undefined
 ) =>
@@ -30,7 +28,6 @@ export const useRateImpactPreview = (
     placeholderData: keepPreviousData,
   })
 
-/** Entering a rate can retroactively finalize pending trades/settlements, so it invalidates the full financial set, not just rates. */
 export const useUpsertRate = () => {
   const qc = useQueryClient()
   return useMutation({

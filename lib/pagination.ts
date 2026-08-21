@@ -1,7 +1,6 @@
 import type { DataTablePagination } from "@/components/shared/data-table"
 import type { PaginatedResponse } from "@/lib/types"
 
-/** API's `meta` uses totalCount/currentPage; DataTable expects total/page. */
 export function toDataTablePagination(
   meta: PaginatedResponse<unknown>["meta"] | undefined,
 ): DataTablePagination | undefined {

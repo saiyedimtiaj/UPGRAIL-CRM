@@ -58,8 +58,6 @@ export interface RateImpactPreview {
   note: string | null
 }
 
-/** Preview how many already-POSTED/FINALIZED trades on this date a rate
- *  value would touch, so a same-day correction can be flagged before save. */
 export async function previewRateImpact(params: {
   date: string
   partyType: PartyType

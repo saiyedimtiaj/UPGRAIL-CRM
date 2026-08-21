@@ -12,7 +12,7 @@ interface ConfirmDialogProps {
   onOpenChange: (open: boolean) => void
   title: string
   description: string
-  /** When true, the confirm button stays disabled until a reason is typed. */
+
   requireReason?: boolean
   reasonLabel?: string
   destructive?: boolean
@@ -35,7 +35,6 @@ export function ConfirmDialog({
 
   const canConfirm = !requireReason || reason.trim().length > 0
 
-  // All close paths route through here so the draft reason can't leak into the next open.
   function handleOpenChange(next: boolean) {
     onOpenChange(next)
     if (!next) setReason("")

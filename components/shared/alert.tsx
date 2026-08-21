@@ -14,7 +14,6 @@ export interface AlertProps {
   className?: string
 }
 
-// Inline banner alert, as opposed to sonner toasts (transient action feedback).
 const VARIANT_STYLES: Record<
   AlertProps["variant"],
   { bg: string; icon: React.ReactNode }

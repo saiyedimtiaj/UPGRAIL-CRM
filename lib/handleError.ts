@@ -1,6 +1,5 @@
 import { isAxiosError } from "axios"
 
-/** Backend error shape: { statusCode, message: string | string[], error, path, timestamp } */
 export function getErrorMessage(error: unknown, fallback = "Something went wrong") {
   if (isAxiosError(error)) {
     const data = error.response?.data as

@@ -41,8 +41,6 @@ import { Button } from "@/components/ui/button"
 import { SellerTradesCard } from "./seller-trades-card"
 import { SellerSettlementsCard } from "./seller-settlements-card"
 
-// Purely-frontend totals — see the same note in client-detail.tsx.
-// TODO(backend): once GET /sellers/:id returns aggregate totals, drop this.
 const TOTALS_LIMIT = 500
 
 export function SellerDetail({ id }: { id: number }) {

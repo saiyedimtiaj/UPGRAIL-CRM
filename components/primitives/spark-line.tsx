@@ -1,6 +1,4 @@
-/** Inline SVG up/down trend line used in table cells (e.g. the dashboard's
- *  regional sourcing table). Purely decorative — direction communicates
- *  "trending up" vs "trending down" for that row. */
+
 export function SparkLine({
   trend,
   className,

@@ -7,12 +7,11 @@ import { FileText, FolderOpen, LayoutGrid, Tag } from "lucide-react"
 export interface EmptyStateProps {
   title: string
   description?: string
-  /** Shown only when `variant="icon"`. */
+
   icon?: React.ReactNode
   action?: React.ReactNode
   size?: "sm" | "md" | "lg"
-  /** "animation" = the orbiting-icon cluster below. "icon" = a plain muted
-   *  icon box using the `icon` prop. */
+
   variant?: "animation" | "icon"
   className?: string
 }

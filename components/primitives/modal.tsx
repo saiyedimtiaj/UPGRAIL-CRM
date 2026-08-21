@@ -19,8 +19,6 @@ interface ModalProps {
   className?: string
 }
 
-/** Built on Base UI's Dialog; Motion is wired in via Base UI's `render` prop,
- *  the supported way to swap in a custom animated backdrop/popup element. */
 export function Modal({
   open,
   onOpenChange,

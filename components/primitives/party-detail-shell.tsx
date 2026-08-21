@@ -10,17 +10,10 @@ import { EmptyState } from "@/components/primitives/empty-state"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Button, buttonVariants } from "@/components/ui/button"
 
-/** Returns true for a real 404 (deleted/never-existed record) as opposed to
- *  a network/server failure — the two deserve different treatment: a 404 is
- *  a normal, calm outcome; anything else deserves a Retry affordance. */
 export function isNotFoundError(error: unknown): boolean {
   return isAxiosError(error) && error.response?.status === 404
 }
 
-/** Loading/404/error wrapper shared by the Client and Seller detail pages,
- *  so neither repeats the three non-happy states. Layout-mirroring skeleton
- *  (header bar + 3-up stat row + two section blocks) rather than a spinner,
- *  to avoid the layout jump a spinner would cause on the real content. */
 export function PartyDetailShell({
   isPending,
   isError,

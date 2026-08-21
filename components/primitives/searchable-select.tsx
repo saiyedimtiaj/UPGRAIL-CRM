@@ -16,7 +16,7 @@ import {
 export interface SearchableSelectOption<V extends string | number = string> {
   value: V
   label: string
-  /** Secondary line shown under the label in the dropdown. */
+
   sublabel?: string
   disabled?: boolean
 }
@@ -33,8 +33,6 @@ interface SearchableSelectProps<V extends string | number = string> {
   id?: string
 }
 
-/** API deliberately mirrors SelectField (`value` / `onChange(value)` /
- *  `options`) so the two are interchangeable at call sites. */
 export function SearchableSelect<V extends string | number = string>({
   value,
   onChange,

@@ -22,8 +22,6 @@ export const useSettlement = (id: number | null) =>
     enabled: id !== null,
   })
 
-/** Spec §7.4, §16.2: fetches the FIFO allocation proposal for a seller +
- *  amount, so the confirm screen can preview it before submitting. */
 export const usePreviewAllocation = (
   sellerId: number | undefined,
   usdtAmount: number | undefined,

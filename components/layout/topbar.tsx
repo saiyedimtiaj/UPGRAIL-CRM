@@ -6,7 +6,6 @@ import { Zap } from "lucide-react"
 import { resolvePageMeta } from "@/lib/nav"
 import { useMetrics } from "@/features/use-analytics"
 import { Button } from "@/components/ui/button"
-import { NotificationsPopover } from "@/components/layout/notifications-popover"
 import { MobileSidebar } from "@/components/layout/mobile-sidebar"
 
 export function Topbar() {
@@ -40,8 +39,6 @@ export function Topbar() {
             {metrics.profitPendingCount} Pending Rates
           </Button>
         )}
-
-        <NotificationsPopover />
 
         <Button
           onClick={() => router.push("/admin/trades")}

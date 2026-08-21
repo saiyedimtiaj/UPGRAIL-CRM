@@ -20,11 +20,6 @@ import { Button } from "@/components/ui/button"
 import { Usdt } from "@/components/primitives/money"
 import type { AllocationOverride } from "@/services/settlements.api"
 
-// Spec §7.3/§7.4/§16.2: the settlement screen is really an *allocation*
-// screen. Fronting USDT to an external seller pays down their oldest open
-// transactions first (FIFO); Owner/Partner can override the proposal before
-// confirming. The settlement-date USDT rate must already be on file — the
-// backend enforces this and this form surfaces that requirement up front.
 export function SettlementForm() {
   const router = useRouter()
   const { data: sellers = [] } = useActiveSellers()
@@ -34,8 +29,7 @@ export function SettlementForm() {
   const fireConfetti = useConfetti()
 
   const conduitSeller = findConduitSeller(sellers)
-  // Settlements are fronted BY the conduit TO an external seller — the
-  // conduit itself never appears as the settlement target.
+
   const externalSellers = sellers.filter((s) => !s.isSettlementConduit)
 
   const [sellerId, setSellerId] = React.useState<number | undefined>(
@@ -52,9 +46,8 @@ export function SettlementForm() {
     numAmount
   )
 
-  // Reset any manual override whenever the inputs that produced the
-  // proposal change, so a stale override can't silently ride along. Done
-  // during render (not an effect) to avoid an extra cascading render pass.
+
+
   const inputsKey = `${sellerId ?? ""}:${usdtAmount}`
   const [overridesFor, setOverridesFor] = React.useState(inputsKey)
   if (overridesFor !== inputsKey) {

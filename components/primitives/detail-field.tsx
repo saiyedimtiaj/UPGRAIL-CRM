@@ -1,9 +1,6 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-// The label-over-value micro-pattern already inlined once on the ledger
-// panes (e.g. "Running Net Balance" above a BalancePill) — extracted so a
-// third hand-rolled copy doesn't appear on the detail pages.
 export function DetailField({
   label,
   value,

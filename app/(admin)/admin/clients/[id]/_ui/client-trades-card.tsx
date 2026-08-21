@@ -13,9 +13,6 @@ import { ProfitStatusBadge } from "@/components/primitives/profit-status-badge"
 import { Bdt, Usd } from "@/components/primitives/money"
 import type { Transaction } from "@/lib/types"
 
-// Only ever mounted once the parent has confirmed `clientId` is a valid,
-// existing id — passing an unfiltered `undefined` here would silently
-// return every trade in the system (axios omits undefined params).
 export function ClientTradesCard({ clientId }: { clientId: number }) {
   const [page, setPage] = React.useState(1)
   const { data, isPending, isFetching } = useTransactions({

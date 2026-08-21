@@ -1,6 +1,5 @@
 import type { AuditAction } from "@/lib/types"
 
-/** Badge metadata only — entries are written server-side. */
 export const AUDIT_ACTION_META: Record<
   AuditAction,
   { label: string; className: string }

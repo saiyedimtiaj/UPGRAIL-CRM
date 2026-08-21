@@ -29,9 +29,8 @@ export function NazmulRatesCard({ date }: { date: string }) {
       })
     : undefined
 
-  // Re-syncs from the loaded rate without an effect: whenever the saved
-  // value changes (new date, or the query resolving), the draft is reset
-  // during render rather than in a subsequent effect pass.
+
+
   const [usdt, setUsdt] = React.useState(savedUsdt?.toString() ?? "")
   const [syncedFor, setSyncedFor] = React.useState(savedUsdt)
   if (syncedFor !== savedUsdt) {

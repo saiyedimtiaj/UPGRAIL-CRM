@@ -1,9 +1,6 @@
 import { cn } from "@/lib/utils"
 import type { ProfitStatus } from "@/lib/types"
 
-/** Spec §6.5: the seller/cost side of a transaction has five states, richer
- *  than the old binary pending/finalized — a trade can be fully priced on
- *  the client side while still waiting on Nazmul to settle the seller. */
 const PROFIT_STATUS_META: Record<ProfitStatus, { label: string; className: string }> = {
   AWAITING_DAILY_RATE: {
     label: "AWAITING DAILY RATE",

@@ -1,6 +1,5 @@
-// The one meaningful seller-type distinction left under the v3.0 pricing
-// model (spec §7): the settlement conduit vs. every external seller. Shared
-// by the Sellers table and the seller detail page.
+
+
 export function SellerKindPill({ isSettlementConduit }: { isSettlementConduit: boolean }) {
   return (
     <span

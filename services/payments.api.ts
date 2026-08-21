@@ -23,7 +23,6 @@ export async function getPayments(params: PaymentListParams = {}): Promise<Pagin
   return data
 }
 
-/** "Paid To" is required — spec §8.2. */
 export interface CreatePaymentPayload {
   date: string
   partyType: PaymentPartyType

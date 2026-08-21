@@ -1,6 +1,5 @@
 import { BDT_SYMBOL } from "@/lib/constants"
 
-/** No decimals — BDT ledgers here are whole-taka. */
 export function bdt(value: number | undefined | null): string {
   const n = value ?? 0
   return `${BDT_SYMBOL}${Math.round(n).toLocaleString("en-US")}`
@@ -22,7 +21,6 @@ export function usdt(value: number | undefined | null): string {
   return `${n.toLocaleString("en-US", { maximumFractionDigits: 2 })} USDT`
 }
 
-/** value is already on a 0-100 scale. */
 export function pct(value: number | undefined | null): string {
   const n = value ?? 0
   return `${n.toFixed(2)}%`

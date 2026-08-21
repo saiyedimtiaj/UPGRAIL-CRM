@@ -23,9 +23,6 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { BrandMark } from "@/components/layout/brand-mark"
 
-// Backend returns the same response regardless of whether the email has an
-// account, so this screen must show the same confirmation either way —
-// otherwise it becomes a way to enumerate registered emails.
 export default function ForgotPasswordPage() {
   const forgotPassword = useForgotPassword()
   const [sent, setSent] = React.useState(false)

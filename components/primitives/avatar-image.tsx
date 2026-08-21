@@ -10,13 +10,10 @@ interface AvatarImageProps {
   className?: string
 }
 
-/** Plain `<img>` (not next/image): avatar URLs are arbitrary/user-supplied,
- *  so next/image's `remotePatterns` allowlist isn't workable here. */
 export function AvatarImage({ src, name, className }: AvatarImageProps) {
   const [failed, setFailed] = React.useState(false)
 
-  // Empty string is not "no src" to the browser — it re-requests the current
-  // page as an "image", so treat it the same as a failed load.
+
   if (failed || !src) {
     return (
       <div
@@ -31,7 +28,7 @@ export function AvatarImage({ src, name, className }: AvatarImageProps) {
   }
 
   return (
-    // eslint-disable-next-line @next/next/no-img-element -- intentional, not next/image
+
     <img
       src={src}
       alt={name}

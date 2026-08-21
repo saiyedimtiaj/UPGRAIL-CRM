@@ -1,6 +1,5 @@
 import type { DailyRate, PartyType, RateKind, Seller } from "@/lib/types"
 
-/** Rates are keyed by (date, party_type, party_id, kind); centralizes that lookup. */
 export function findRate(
   rates: DailyRate[],
   args: {
@@ -31,8 +30,6 @@ export function findRateValue(
   return findRate(rates, args)?.value
 }
 
-/** Caller must supply the conduit seller id, e.g. from
- *  useActiveSellers().data?.find(s => s.isSettlementConduit). */
 export function findConduitUsdtRate(
   rates: DailyRate[],
   date: string,
