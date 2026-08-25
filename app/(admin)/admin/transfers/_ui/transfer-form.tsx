@@ -7,7 +7,6 @@ import type { MoneyDestination } from "@/lib/types"
 import { useCreateTransfer, useTransferPreview } from "@/features/use-transfers"
 import { getErrorMessage } from "@/lib/handleError"
 import { useConfetti } from "@/hooks/use-confetti"
-import { SectionCard } from "@/components/primitives/section-card"
 import { SelectField } from "@/components/primitives/select-field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -20,7 +19,11 @@ const DESTINATION_OPTIONS = [
   { value: "PROFIT_BANK", label: "Profit Bank" },
 ]
 
-export function TransferForm() {
+interface TransferFormProps {
+  onDone?: () => void
+}
+
+export function TransferForm({ onDone }: TransferFormProps) {
   const createTransfer = useCreateTransfer()
   const fireConfetti = useConfetti()
 
@@ -61,13 +64,13 @@ export function TransferForm() {
       setReference("")
       setNote("")
       setReason("")
+      onDone?.()
     } catch (error) {
       toast.error(getErrorMessage(error, "Failed to record transfer."))
     }
   }
 
   return (
-    <SectionCard title="Transfer Money">
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
@@ -182,6 +185,5 @@ export function TransferForm() {
           Transfer Funds
         </Button>
       </form>
-    </SectionCard>
   )
 }

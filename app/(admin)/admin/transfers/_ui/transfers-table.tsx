@@ -16,7 +16,11 @@ import { RowActions } from "@/components/shared/row-actions"
 import { ConfirmDialog } from "@/components/primitives/confirm-dialog"
 import { StatusBadge } from "@/components/primitives/status-badge"
 import { Bdt } from "@/components/primitives/money"
+import { Modal } from "@/components/primitives/modal"
+import { Button } from "@/components/ui/button"
+import { TransferForm } from "@/app/(admin)/admin/transfers/_ui/transfer-form"
 import type { MoneyTransfer } from "@/lib/types"
+import { ArrowRightLeftIcon, PlusIcon } from "lucide-react"
 
 const DESTINATION_LABEL: Record<string, string> = {
   NAZMUL: "Nazmul",
@@ -26,6 +30,7 @@ const DESTINATION_LABEL: Record<string, string> = {
 
 export function TransfersTable() {
   const [page, setPage] = React.useState(1)
+  const [isTransferModalOpen, setIsTransferModalOpen] = React.useState(false)
   const { data, isPending } = useTransfers({ page, limit: PAGE_SIZE })
   const { data: me } = useMe()
   const voidTransfer = useVoidTransfer()
@@ -98,7 +103,19 @@ export function TransfersTable() {
 
   return (
     <>
-      <SectionCard title="Transfer History">
+      <SectionCard
+        title="Transfer History"
+        subtitle="Review and record movement between internal destinations."
+        action={
+          <Button
+            onClick={() => setIsTransferModalOpen(true)}
+            className="gap-2 shadow-sm"
+          >
+            <PlusIcon className="h-4 w-4" />
+            New Transfer
+          </Button>
+        }
+      >
         <DataTable
           columns={columns}
           data={transfers}
@@ -110,6 +127,20 @@ export function TransfersTable() {
           rowClassName={(t) => (t.voided ? "opacity-40 line-through" : "")}
         />
       </SectionCard>
+
+      <Modal
+        open={isTransferModalOpen}
+        onOpenChange={setIsTransferModalOpen}
+        title="Transfer Money"
+        description="Move funds between internal destinations and record the ledger effect."
+        className="max-w-xl"
+      >
+        <div className="mb-5 flex items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-50/70 px-4 py-3 text-xs text-emerald-900">
+          <ArrowRightLeftIcon className="h-4 w-4 shrink-0 text-emerald-600" />
+          <span>Review the destination route and ledger preview before confirming.</span>
+        </div>
+        <TransferForm onDone={() => setIsTransferModalOpen(false)} />
+      </Modal>
 
       <ConfirmDialog
         open={voidTarget !== null}
