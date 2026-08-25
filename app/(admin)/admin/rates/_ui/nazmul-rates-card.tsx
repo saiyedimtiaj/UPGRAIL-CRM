@@ -11,10 +11,11 @@ import { useConfetti } from "@/hooks/use-confetti"
 import { SectionCard } from "@/components/primitives/section-card"
 import { RateInputRow } from "@/components/primitives/rate-input-row"
 import { Alert } from "@/components/shared/alert"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function NazmulRatesCard({ date }: { date: string }) {
-  const { data: rates = [] } = useRates({ date })
-  const { data: sellers = [] } = useActiveSellers()
+  const { data: rates = [], isPending: ratesPending } = useRates({ date })
+  const { data: sellers = [], isPending: sellersPending } = useActiveSellers()
   const upsertRate = useUpsertRate()
   const fireConfetti = useConfetti()
 
@@ -85,21 +86,27 @@ export function NazmulRatesCard({ date }: { date: string }) {
       }
     >
       <div className="space-y-4">
-        <RateInputRow
-          tone="dark"
-          label="Conduit USDT Rate"
-          hint="৳ per USDT — used to price same-day conduit trades and seller settlements"
-          value={usdt}
-          onChange={setUsdt}
-          onSave={() => save(usdt)}
-          disabled={!conduitSeller}
-        />
-        {!!impact?.alreadyPricedCount && (
-          <Alert
-            variant="warning"
-            title={`This will re-price ${impact.alreadyPricedCount} already-finalized trade(s)`}
-            message={impact.note ?? "Saving will recompute these trades."}
-          />
+        {ratesPending || sellersPending ? (
+          <Skeleton className="h-10 rounded-lg" />
+        ) : (
+          <>
+            <RateInputRow
+              tone="dark"
+              label="Conduit USDT Rate"
+              hint="৳ per USDT — used to price same-day conduit trades and seller settlements"
+              value={usdt}
+              onChange={setUsdt}
+              onSave={() => save(usdt)}
+              disabled={!conduitSeller}
+            />
+            {!!impact?.alreadyPricedCount && (
+              <Alert
+                variant="warning"
+                title={`This will re-price ${impact.alreadyPricedCount} already-finalized trade(s)`}
+                message={impact.note ?? "Saving will recompute these trades."}
+              />
+            )}
+          </>
         )}
       </div>
     </SectionCard>

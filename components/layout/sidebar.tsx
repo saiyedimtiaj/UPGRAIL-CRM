@@ -12,10 +12,11 @@ import { useLogout, useMe } from "@/features/use-auth"
 import { SidebarNav } from "@/components/layout/sidebar-nav"
 import { BrandMark, BrandWordmark } from "@/components/layout/brand-mark"
 import { AvatarImage } from "@/components/primitives/avatar-image"
+import { Skeleton } from "@/components/ui/skeleton"
 
 
 export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
-  const { data: currentUser } = useMe()
+  const { data: currentUser, isPending: userPending } = useMe()
   const logoutMutation = useLogout()
   const router = useRouter()
   const pathname = usePathname()
@@ -82,13 +83,22 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
               />
               <span className="absolute right-0 bottom-0 h-2 w-2 rounded-full bg-emerald-400 ring-1 ring-brand-ink" />
             </div>
-            <div className="min-w-0">
-              <div className="truncate text-sm font-bold text-white">
-                {currentUser?.name}
-              </div>
-              <div className="truncate text-xs text-zinc-400">
-                {currentUser?.email}
-              </div>
+            <div className="min-w-0 space-y-1">
+              {userPending ? (
+                <>
+                  <Skeleton className="h-4 w-24 bg-white/10" />
+                  <Skeleton className="h-3 w-32 bg-white/10" />
+                </>
+              ) : (
+                <>
+                  <div className="truncate text-sm font-bold text-white">
+                    {currentUser?.name}
+                  </div>
+                  <div className="truncate text-xs text-zinc-400">
+                    {currentUser?.email}
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

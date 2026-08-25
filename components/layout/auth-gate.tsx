@@ -4,7 +4,6 @@ import * as React from "react"
 import { usePathname, useRouter } from "next/navigation"
 
 import { useMe } from "@/features/use-auth"
-import { AdminSkeleton } from "@/components/layout/admin-skeleton"
 
 export function AuthGate({ children }: { children: React.ReactNode }) {
   const { data: user, isPending, isError } = useMe()
@@ -20,10 +19,6 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
     }
 
   }, [isAuthenticated, isPending, pathname, router])
-
-  if (isPending || !isAuthenticated) {
-    return <AdminSkeleton />
-  }
 
   return <>{children}</>
 }

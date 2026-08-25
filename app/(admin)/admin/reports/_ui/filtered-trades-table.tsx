@@ -11,7 +11,13 @@ import { ProfitStatusBadge } from "@/components/primitives/profit-status-badge"
 import { Bdt, Usd, Usdt } from "@/components/primitives/money"
 import type { Transaction } from "@/lib/types"
 
-export function FilteredTradesTable({ trades }: { trades: Transaction[] }) {
+export function FilteredTradesTable({
+  trades,
+  isLoading,
+}: {
+  trades: Transaction[]
+  isLoading?: boolean
+}) {
   const { data: clients = [] } = useActiveClients()
   const { data: sellers = [] } = useActiveSellers()
 
@@ -88,6 +94,7 @@ export function FilteredTradesTable({ trades }: { trades: Transaction[] }) {
         data={trades}
         rowKey={(t) => t.id}
         entityLabel="trades"
+        isLoading={isLoading}
         rowClassName={(t) => (t.voided ? "opacity-40 line-through" : "")}
       />
     </SectionCard>

@@ -18,10 +18,11 @@ import DataTable, {
 } from "@/components/shared/data-table"
 import { RowActions } from "@/components/shared/row-actions"
 import { ConfirmDialog } from "@/components/primitives/confirm-dialog"
+import { StatusBadge } from "@/components/primitives/status-badge"
 import { Button } from "@/components/ui/button"
 import { BdtSigned } from "@/components/primitives/money"
 import { LogPaymentModal } from "@/components/shared/log-payment-modal"
-import type { Payment } from "@/lib/types"
+import type { MoneyDestination, Payment } from "@/lib/types"
 import {
   PaymentsFilters,
   type PaymentsFiltersState,
@@ -33,6 +34,12 @@ const EMPTY_FILTERS: PaymentsFiltersState = {
   dateTo: "",
   partyType: "all",
   direction: "all",
+}
+
+const DESTINATION_LABEL: Record<MoneyDestination, string> = {
+  UPGRAIL_BANK: "UpGrail Bank",
+  NAZMUL: "Nazmul",
+  PROFIT_BANK: "Profit Bank",
 }
 
 export function PaymentsTable() {
@@ -71,8 +78,6 @@ export function PaymentsTable() {
     p.party_type === "CLIENT"
       ? (clients.find((c) => c.id === p.party_id)?.name ?? String(p.party_id))
       : (sellers.find((s) => s.id === p.party_id)?.name ?? String(p.party_id))
-
-  const sorted = [...payments].sort((a, b) => (a.date < b.date ? 1 : -1))
 
   const columns: DataTableColumn<Payment>[] = [
     {
@@ -124,16 +129,17 @@ export function PaymentsTable() {
       ),
     },
     {
-      key: "method",
-      header: "Method",
-      cell: (p) => <span className="text-slate-600">{p.method ?? "—"}</span>,
+      key: "destination",
+      header: "Paid To",
+      cell: (p) => (
+        <span className="text-slate-600">{DESTINATION_LABEL[p.destination]}</span>
+      ),
       hideBelow: "lg",
     },
     {
-      key: "note",
-      header: "Note",
-      cell: (p) => <span className="text-slate-500">{p.note ?? "—"}</span>,
-      hideBelow: "xl",
+      key: "status",
+      header: "Status",
+      cell: (p) => <StatusBadge status={p.voided ? "voided" : "finalized"} />,
     },
     {
       key: "actions",
@@ -141,7 +147,7 @@ export function PaymentsTable() {
       align: "right",
       cell: (p) => (
         <RowActions
-          disabled={!canManage}
+          disabled={!canManage || p.voided}
           onEdit={() => setEditTarget(p)}
           onDelete={() => setDeleteTarget(p)}
         />
@@ -169,12 +175,13 @@ export function PaymentsTable() {
         <div className={isFetching && !isPending ? "opacity-60 transition-opacity" : undefined}>
           <DataTable
             columns={columns}
-            data={sorted}
+            data={payments}
             rowKey={(p) => p.id}
             entityLabel="payments"
             isLoading={isPending}
             pagination={toDataTablePagination(data?.meta)}
             onPageChange={setPage}
+            rowClassName={(p) => (p.voided ? "opacity-40 line-through" : "")}
           />
         </div>
       </SectionCard>
@@ -191,17 +198,17 @@ export function PaymentsTable() {
       <ConfirmDialog
         open={deleteTarget !== null}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
-        title="Delete Payment"
-        description={`Permanently remove this payment for ${deleteTarget ? partyName(deleteTarget) : "this party"}? This cannot be undone.`}
+        title="Void Payment"
+        description={`Void this payment for ${deleteTarget ? partyName(deleteTarget) : "this party"}? It stays visible in the log as VOIDED and drops out of all balance calculations — this is not reversible from here.`}
         destructive
-        confirmLabel="Delete"
+        confirmLabel="Void"
         onConfirm={async () => {
           if (!deleteTarget) return
           try {
             await deletePayment.mutateAsync(deleteTarget.id)
-            toast.success("Payment deleted.")
+            toast.success("Payment voided.")
           } catch (error) {
-            toast.error(getErrorMessage(error, "Failed to delete payment."))
+            toast.error(getErrorMessage(error, "Failed to void payment."))
           } finally {
             setDeleteTarget(null)
           }

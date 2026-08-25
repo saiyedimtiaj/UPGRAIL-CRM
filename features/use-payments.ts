@@ -4,6 +4,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import * as paymentsApi from "@/services/payments.api"
 import type { CreatePaymentPayload, PaymentListParams } from "@/services/payments.api"
 import { QK, invalidateFinancials } from "@/features/query-keys"
+import type { MoneyDestination } from "@/lib/types"
 
 export const usePayments = (params: PaymentListParams = {}) =>
   useQuery({
@@ -31,8 +32,16 @@ export const useCreatePayment = () => {
 export const useUpdatePayment = () => {
   const invalidate = useInvalidatePayments()
   return useMutation({
-    mutationFn: ({ id, ...payload }: { id: number; amount?: number; note?: string; method?: string }) =>
-      paymentsApi.updatePayment(id, payload),
+    mutationFn: ({
+      id,
+      ...payload
+    }: {
+      id: number
+      amount?: number
+      destination?: MoneyDestination
+      note?: string
+      method?: string
+    }) => paymentsApi.updatePayment(id, payload),
     onSuccess: invalidate,
   })
 }

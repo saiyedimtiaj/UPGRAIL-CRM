@@ -31,6 +31,7 @@ import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { LogPaymentModal } from "@/components/shared/log-payment-modal"
 import { AddClientModal } from "@/components/shared/add-client-modal"
+import { Skeleton } from "@/components/ui/skeleton"
 import type { ClientChargeStatus, Payment } from "@/lib/types"
 
 const CHARGE_STATUS_TO_UI: Record<ClientChargeStatus, Status> = {
@@ -39,7 +40,7 @@ const CHARGE_STATUS_TO_UI: Record<ClientChargeStatus, Status> = {
 }
 
 export function ClientLedger() {
-  const { data: clients = [] } = useActiveClients()
+  const { data: clients = [], isPending: clientsPending } = useActiveClients()
   const { data: txData } = useTransactions({ limit: 500 })
   const { data: paymentsData } = usePayments({ limit: 500 })
   const { data: balances } = useBalances()
@@ -137,28 +138,51 @@ export function ClientLedger() {
       <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-12">
         <div className="lg:col-span-5">
           <SectionCard>
-            <motion.div
-              variants={staggerParent}
-              initial="hidden"
-              animate="show"
-              className="max-h-128 space-y-2 overflow-y-auto"
-            >
-              {sortedClients.map((client) => (
-                <PartyListItem
-                  key={client.id}
-                  title={client.name}
-                  subtitle={client.company}
-                  balance={clientBalances[client.id] ?? 0}
-                  selected={client.id === selectedId}
-                  onSelect={() => setSelectedId(client.id)}
-                />
-              ))}
-            </motion.div>
+            {clientsPending ? (
+              <div className="space-y-2">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-[60px] rounded-xl" />
+                ))}
+              </div>
+            ) : (
+              <motion.div
+                variants={staggerParent}
+                initial="hidden"
+                animate="show"
+                className="max-h-128 space-y-2 overflow-y-auto"
+              >
+                {sortedClients.map((client) => (
+                  <PartyListItem
+                    key={client.id}
+                    title={client.name}
+                    subtitle={client.company}
+                    balance={clientBalances[client.id] ?? 0}
+                    selected={client.id === selectedId}
+                    onSelect={() => setSelectedId(client.id)}
+                  />
+                ))}
+              </motion.div>
+            )}
           </SectionCard>
         </div>
 
         <div className="lg:col-span-7">
-          {selected ? (
+          {clientsPending ? (
+            <SectionCard>
+              <div className="mb-5 flex items-center justify-between gap-4 border-b border-zinc-100 pb-5">
+                <div className="space-y-2">
+                  <Skeleton className="h-5 w-40" />
+                  <Skeleton className="h-3 w-56" />
+                </div>
+                <Skeleton className="h-12 w-32 rounded-xl" />
+              </div>
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-14 rounded-xl" />
+                ))}
+              </div>
+            </SectionCard>
+          ) : selected ? (
             <SectionCard>
               <div className="mb-5 flex flex-wrap items-start justify-between gap-4 border-b border-zinc-100 pb-5">
                 <div className="min-w-0">

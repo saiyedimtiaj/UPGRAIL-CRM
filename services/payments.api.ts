@@ -41,7 +41,7 @@ export async function createPayment(payload: CreatePaymentPayload): Promise<Paym
 
 export async function updatePayment(
   id: number,
-  payload: { amount?: number; note?: string; method?: string },
+  payload: { amount?: number; destination?: MoneyDestination; note?: string; method?: string },
 ): Promise<Payment> {
   const { data } = await api.patch(`/payments/${id}`, payload)
   return data

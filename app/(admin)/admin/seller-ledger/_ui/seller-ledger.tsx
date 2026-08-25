@@ -33,13 +33,14 @@ import { Button } from "@/components/ui/button"
 import { LogPaymentModal } from "@/components/shared/log-payment-modal"
 import { LogSettlementModal } from "@/app/(admin)/admin/seller-ledger/_ui/log-settlement-modal"
 import { AddSellerModal } from "@/components/shared/add-seller-modal"
+import { Skeleton } from "@/components/ui/skeleton"
 import type { Payment, Seller, USDTSettlement } from "@/lib/types"
 
 type SellerFilter = "all" | "conduit" | "external"
 
 
 export function SellerLedger() {
-  const { data: sellers = [] } = useActiveSellers()
+  const { data: sellers = [], isPending: sellersPending } = useActiveSellers()
   const { data: txData } = useTransactions({ limit: 500 })
   const { data: settlementsData } = useSettlements({ limit: 500 })
   const { data: paymentsData } = usePayments({ limit: 500 })
@@ -195,32 +196,55 @@ export function SellerLedger() {
       <div className="grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-12">
         <div className="lg:col-span-5">
           <SectionCard>
-            <motion.div
-              variants={staggerParent}
-              initial="hidden"
-              animate="show"
-              className="max-h-128 space-y-2 overflow-y-auto"
-            >
-              {filteredSellers.map((seller) => (
-                <PartyListItem
-                  key={seller.id}
-                  title={`${seller.flag} ${seller.name}`}
-                  subtitle={`${seller.region} • ${seller.isSettlementConduit ? "Settlement Conduit" : "External Seller"}`}
-                  balance={
-                    seller.isSettlementConduit
-                      ? nazmulDue
-                      : (sellerUsdtDues[seller.id] ?? 0)
-                  }
-                  selected={seller.id === selectedId}
-                  onSelect={() => setSelectedId(seller.id)}
-                />
-              ))}
-            </motion.div>
+            {sellersPending ? (
+              <div className="space-y-2">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <Skeleton key={i} className="h-[60px] rounded-xl" />
+                ))}
+              </div>
+            ) : (
+              <motion.div
+                variants={staggerParent}
+                initial="hidden"
+                animate="show"
+                className="max-h-128 space-y-2 overflow-y-auto"
+              >
+                {filteredSellers.map((seller) => (
+                  <PartyListItem
+                    key={seller.id}
+                    title={`${seller.flag} ${seller.name}`}
+                    subtitle={`${seller.region} • ${seller.isSettlementConduit ? "Settlement Conduit" : "External Seller"}`}
+                    balance={
+                      seller.isSettlementConduit
+                        ? nazmulDue
+                        : (sellerUsdtDues[seller.id] ?? 0)
+                    }
+                    selected={seller.id === selectedId}
+                    onSelect={() => setSelectedId(seller.id)}
+                  />
+                ))}
+              </motion.div>
+            )}
           </SectionCard>
         </div>
 
         <div className="lg:col-span-7">
-          {selected ? (
+          {sellersPending ? (
+            <SectionCard>
+              <div className="mb-5 flex items-center justify-between gap-4 border-b border-zinc-100 pb-5">
+                <div className="space-y-2">
+                  <Skeleton className="h-5 w-40" />
+                  <Skeleton className="h-3 w-56" />
+                </div>
+                <Skeleton className="h-12 w-32 rounded-xl" />
+              </div>
+              <div className="space-y-3">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <Skeleton key={i} className="h-14 rounded-xl" />
+                ))}
+              </div>
+            </SectionCard>
+          ) : selected ? (
             <SectionCard>
               <div className="mb-5 flex flex-wrap items-start justify-between gap-4 border-b border-zinc-100 pb-5">
                 <div className="min-w-0">

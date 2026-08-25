@@ -95,8 +95,11 @@ function PaymentForm({
       : sellers.find((s) => s.id === partyId)?.name) ??
     "this party"
 
+  const isSubmitting = createPayment.isPending || updatePayment.isPending
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (isSubmitting) return
     const num = Number(amount)
     if (!num || !partyId) return
 
@@ -105,6 +108,7 @@ function PaymentForm({
         await updatePayment.mutateAsync({
           id: initial.id,
           amount: num,
+          destination,
           method,
           note: note || undefined,
         })
@@ -218,7 +222,6 @@ function PaymentForm({
           id="payment-destination"
           value={destination}
           onChange={(v) => setDestination(v as MoneyDestination)}
-          disabled={isEdit}
           options={[
             { value: "UPGRAIL_BANK", label: "UpGrail Bank (reserve)" },
             { value: "NAZMUL", label: "Nazmul (settlement conduit)" },
@@ -245,8 +248,8 @@ function PaymentForm({
           placeholder="Optional"
         />
       </div>
-      <Button type="submit" className="w-full">
-        {isEdit ? "Save Changes" : "Log Payment"}
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? "Saving..." : isEdit ? "Save Changes" : "Log Payment"}
       </Button>
     </form>
   )

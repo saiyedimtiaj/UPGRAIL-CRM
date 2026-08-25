@@ -11,6 +11,7 @@ import { getErrorMessage } from "@/lib/handleError"
 import { useConfetti } from "@/hooks/use-confetti"
 import { SectionCard } from "@/components/primitives/section-card"
 import { RateInputRow } from "@/components/primitives/rate-input-row"
+import { Skeleton } from "@/components/ui/skeleton"
 
 function ClientRateRow({
   date,
@@ -84,8 +85,8 @@ function ClientRateRow({
 }
 
 export function ClientRatesGrid({ date }: { date: string }) {
-  const { data: rates = [] } = useRates({ date })
-  const { data: clients = [] } = useActiveClients()
+  const { data: rates = [], isPending: ratesPending } = useRates({ date })
+  const { data: clients = [], isPending: clientsPending } = useActiveClients()
 
   const [drafts, setDrafts] = React.useState<Record<number, string>>({})
 
@@ -104,25 +105,29 @@ export function ClientRatesGrid({ date }: { date: string }) {
       subtitle="What each client pays the business per USD sourced"
     >
       <div className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
-        {clients.map((client) => (
-          <ClientRateRow
-            key={client.id}
-            date={date}
-            clientId={client.id}
-            clientName={client.name}
-            clientRegion={client.region}
-            savedValue={savedFor(client.id)}
-            draft={drafts[client.id]}
-            onDraftChange={(v) => setDrafts((prev) => ({ ...prev, [client.id]: v }))}
-            onSaved={() =>
-              setDrafts((prev) => {
-                const next = { ...prev }
-                delete next[client.id]
-                return next
-              })
-            }
-          />
-        ))}
+        {ratesPending || clientsPending
+          ? Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 rounded-lg" />
+            ))
+          : clients.map((client) => (
+              <ClientRateRow
+                key={client.id}
+                date={date}
+                clientId={client.id}
+                clientName={client.name}
+                clientRegion={client.region}
+                savedValue={savedFor(client.id)}
+                draft={drafts[client.id]}
+                onDraftChange={(v) => setDrafts((prev) => ({ ...prev, [client.id]: v }))}
+                onSaved={() =>
+                  setDrafts((prev) => {
+                    const next = { ...prev }
+                    delete next[client.id]
+                    return next
+                  })
+                }
+              />
+            ))}
       </div>
     </SectionCard>
   )

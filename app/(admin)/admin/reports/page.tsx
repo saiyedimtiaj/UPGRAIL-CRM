@@ -31,7 +31,7 @@ export default function ReportsPage() {
     setFilters((f) => ({ ...f, dateFrom: isoDaysAgo(settings.defaultReportWindowDays, today) }))
   }, [settings?.defaultReportWindowDays])
 
-  const { data } = useTransactions({
+  const { data, isPending } = useTransactions({
     limit: 1000,
     dateFrom: filters.dateFrom || undefined,
     dateTo: filters.dateTo || undefined,
@@ -50,11 +50,11 @@ export default function ReportsPage() {
     <div className="w-full space-y-5 p-4 sm:space-y-6 sm:p-6">
       <ReportFilters value={filters} onChange={handleFiltersChange} />
 
-      <ReportSummary trades={filteredTrades} />
+      <ReportSummary trades={filteredTrades} isLoading={isPending} />
 
       <ExportCard trades={filteredTrades} />
 
-      <FilteredTradesTable trades={filteredTrades} />
+      <FilteredTradesTable trades={filteredTrades} isLoading={isPending} />
     </div>
   )
 }
