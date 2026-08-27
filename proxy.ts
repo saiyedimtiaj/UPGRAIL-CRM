@@ -22,6 +22,14 @@ export function proxy(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Resolved here (before any React tree mounts) rather than via a
+  // Server Component redirect() in the page itself — doing it there raced
+  // with PageTransition's AnimatePresence key={pathname}, letting the
+  // 0-hook redirect stub and the many-hook Team page share one render
+  // under the same key on first client-side navigation, which crashed
+  // with "Rendered more hooks than during the previous render." A hard
+  // refresh never showed it because the redirect was already fully
+  // resolved server-side before the client ever mounted anything.
   if (pathname === "/admin/settings") {
     const url = request.nextUrl.clone()
     url.pathname = "/admin/settings/team"

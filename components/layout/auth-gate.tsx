@@ -20,5 +20,7 @@ export function AuthGate({ children }: { children: React.ReactNode }) {
 
   }, [isAuthenticated, isPending, pathname, router])
 
+  if (isPending || !isAuthenticated) return null
+
   return <>{children}</>
 }

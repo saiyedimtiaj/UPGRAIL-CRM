@@ -1,5 +1,6 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios"
 
+import { removeAuthTokenAction } from "@/lib/cookies"
 
 export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1",
@@ -22,6 +23,7 @@ api.interceptors.request.use(
 )
 
 const AUTH_ENDPOINTS = ["/auth/sign-in"]
+const AUTH_ROUTES = ["/sign-in", "/forgot-password", "/reset-password"]
 
 api.interceptors.response.use(
   (response) => response,
@@ -30,7 +32,15 @@ api.interceptors.response.use(
     const isAuthEndpoint = AUTH_ENDPOINTS.some((p) => requestUrl.includes(p))
 
     if (error.response?.status === 401 && typeof window !== "undefined" && !isAuthEndpoint) {
-      window.location.href = "/sign-in"
+      void removeAuthTokenAction().finally(() => {
+        const isAuthRoute = AUTH_ROUTES.some((route) =>
+          window.location.pathname.startsWith(route),
+        )
+
+        if (!isAuthRoute) {
+          window.location.replace("/sign-in")
+        }
+      })
     }
 
     return Promise.reject(error)
