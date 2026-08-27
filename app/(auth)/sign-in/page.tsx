@@ -34,8 +34,7 @@ export default function SignInPage() {
   async function onSubmit(values: SignInFormValues) {
     try {
       await signIn.mutateAsync(values)
-      router.push("/admin")
-      router.refresh()
+      router.replace("/admin")
     } catch (error) {
       toast.error(getErrorMessage(error, "Could not sign in"))
     }
