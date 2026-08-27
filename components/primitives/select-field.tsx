@@ -55,7 +55,8 @@ export function SelectField({
         id={id}
         className={cn(
           variant === "pill-dark" ? PILL_DARK_TRIGGER : "w-full",
-          className
+          className ,
+          "uppercase"
         )}
       >
         <SelectValue placeholder={placeholder} />

@@ -70,8 +70,14 @@ export function PricingMarginsCard() {
   return (
     <SectionCard
       title="Pricing & Margins"
-      subtitle="The spread margin shown on the dashboard before any trade has finalized"
+      subtitle="ড্যাশবোর্ডে কোনো ট্রেড ফাইনাল হওয়ার আগে যে আনুমানিক spread margin দেখানো হয়"
     >
+      <p className="mb-5 max-w-3xl rounded-xl border border-emerald-100 bg-emerald-50/70 px-4 py-3 text-xs leading-5 text-emerald-950">
+        এই fallback margin হলো প্রাথমিক অনুমান। কোনো ট্রেড ফাইনাল না হওয়া পর্যন্ত
+        ড্যাশবোর্ডে সম্ভাব্য লাভের spread দেখাতে এটি ব্যবহার করা হয়। ট্রেড ফাইনাল
+        হলে প্রকৃত buy ও sell rate থেকে হিসাব করা realized spread এই মানকে প্রতিস্থাপন
+        করে।
+      </p>
       {isPending || !settings ? (
         <Skeleton className="h-16 rounded-xl" />
       ) : (

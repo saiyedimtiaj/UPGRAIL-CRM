@@ -13,6 +13,7 @@ import { SidebarNav } from "@/components/layout/sidebar-nav"
 import { BrandMark, BrandWordmark } from "@/components/layout/brand-mark"
 import { AvatarImage } from "@/components/primitives/avatar-image"
 import { Skeleton } from "@/components/ui/skeleton"
+import Image from "next/image"
 
 
 export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
@@ -29,10 +30,9 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="flex h-full flex-col overflow-y-auto p-4 lg:overflow-visible lg:p-0">
-      <div className="space-y-4 lg:sticky lg:top-0 lg:z-10 lg:bg-brand-ink lg:p-4 pb-2 border-b border-white/5">
+      <div className="space-y-4 lg:sticky lg:top-0 lg:z-10 lg:bg-brand-ink lg:p-3 pb-3 border-b border-white/5">
         <div className="flex items-center gap-3 px-2 py-1">
-          <BrandMark />
-          <BrandWordmark />
+          <Image src="/logo.webp" alt="Logo" className="h-8 w-auto" width={100} height={100} />
         </div>
       </div>
 

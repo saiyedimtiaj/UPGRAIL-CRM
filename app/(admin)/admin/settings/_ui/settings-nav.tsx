@@ -2,13 +2,12 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { Users2, ShieldCheck, UserCircle2, Database, SlidersHorizontal } from "lucide-react"
+import { Users2, UserCircle2, Database, SlidersHorizontal } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
 const SETTINGS_TABS = [
   { href: "/admin/settings/team", label: "Team", icon: Users2 },
-  { href: "/admin/settings/permissions", label: "Permissions", icon: ShieldCheck },
   { href: "/admin/settings/business", label: "Business Rules", icon: SlidersHorizontal },
   { href: "/admin/settings/account", label: "Account", icon: UserCircle2 },
   { href: "/admin/settings/system", label: "System", icon: Database },

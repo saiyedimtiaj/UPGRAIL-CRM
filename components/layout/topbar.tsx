@@ -19,7 +19,7 @@ export function Topbar() {
       <div className="flex min-w-0 items-center gap-2">
         <MobileSidebar />
         <div className="min-w-0">
-          <h1 className="truncate text-sm font-extrabold tracking-tight text-slate-900 sm:text-base">
+          <h1 className="truncate text-lg font-extrabold tracking-tight text-slate-900 md:text-base">
             {meta.title}
           </h1>
           <p className="hidden truncate text-xs font-medium text-slate-500 sm:block">
