@@ -4,16 +4,7 @@
 
 @custom-variant dark (&:is(.dark *));
 
-/*
- * AdFund Global design tokens.
- *
- * The product is a single-theme "emerald on near-black" institutional CRM:
- * a light content canvas (#f8faf9) holding white cards, with a permanently
- * dark sidebar and a handful of dark "hero" surfaces for KPI emphasis. There
- * is no dark-mode toggle in the admin app by design, so the shadcn `.dark`
- * block below is kept for completeness but is never activated at runtime
- * (see components/theme-provider.tsx, which forces the light theme).
- */
+
 @theme inline {
     --font-heading: var(--font-sans);
     --font-sans: var(--font-jakarta);

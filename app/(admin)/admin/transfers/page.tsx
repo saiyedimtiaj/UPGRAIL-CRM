@@ -3,11 +3,13 @@
 import { useMe } from "@/features/use-auth"
 import { LockScreen } from "@/components/primitives/lock-screen"
 import { TransfersTable } from "@/app/(admin)/admin/transfers/_ui/transfers-table"
+import ComingSoon from "@/components/shared/cooming-soon"
 
 export default function TransfersPage() {
   const { data: me } = useMe()
+  return <ComingSoon />
 
-  if (me && me.role.name !== "OWNER" && me.role.name !== "PARTNER") {
+  if (me && me?.role.name !== "OWNER" && me?.role.name !== "PARTNER") {
     return (
       <div className="w-full p-4 sm:p-6">
         <LockScreen
