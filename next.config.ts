@@ -13,14 +13,29 @@ import type { NextConfig } from "next"
  *
  * Set API_ORIGIN to the backend's base URL (no trailing slash).
  */
-const API_ORIGIN = process.env.API_ORIGIN ?? "http://localhost:8000"
+function resolveApiOrigin(): string {
+  const origin = process.env.API_ORIGIN
+
+  if (origin) return origin.replace(/\/+$/, "")
+
+  // rewrites() is evaluated at BUILD time, so a missing API_ORIGIN would be
+  // silently baked in as localhost and every request would fail in the
+  // deployed app with no obvious cause. Fail the build instead.
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "API_ORIGIN is not set. Add it to your deployment environment " +
+        "(Vercel → Settings → Environment Variables) as the backend's base " +
+        "URL, e.g. https://api.example.com — no trailing slash, no /api/v1."
+    )
+  }
+
+  return "http://localhost:8000"
+}
+
+const API_ORIGIN = resolveApiOrigin()
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-
-  // Emits .next/standalone with only the files the server actually needs,
-  // which is what the Dockerfile copies. Harmless outside Docker.
-  output: "standalone",
 
   // The framework banner leaks the stack to anyone reading response headers.
   poweredByHeader: false,

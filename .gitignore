@@ -30,6 +30,9 @@ pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...but the template belongs in the repo — it documents which variables a
+# deploy needs, and contains no secrets.
+!.env.example
 
 # typescript
 *.tsbuildinfo
