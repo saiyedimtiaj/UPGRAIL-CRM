@@ -12,6 +12,7 @@ import {
 import { ReportSummary } from "@/app/(admin)/admin/reports/_ui/report-summary"
 import { ExportCard } from "@/app/(admin)/admin/reports/_ui/export-card"
 import { FilteredTradesTable } from "@/app/(admin)/admin/reports/_ui/filtered-trades-table"
+import ComingSoon from "@/components/shared/cooming-soon"
 
 
 export default function ReportsPage() {
@@ -45,6 +46,8 @@ export default function ReportsPage() {
     dateFromTouched.current = true
     setFilters(next)
   }
+
+    return <ComingSoon/>
 
   return (
     <div className="w-full space-y-5 p-4 sm:space-y-6 sm:p-6">
