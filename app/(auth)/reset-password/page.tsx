@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ArrowRight, CheckCircle2, KeyRound, Loader2, TriangleAlert } from "lucide-react"
+import { ArrowRight, CheckCircle2, Loader2, TriangleAlert } from "lucide-react"
 
 import {
   resetPasswordSchema,
@@ -14,7 +14,6 @@ import {
 import { useResetPassword } from "@/features/use-auth"
 import { getErrorMessage } from "@/lib/handleError"
 import { Button } from "@/components/ui/button"
-import { BrandMark } from "@/components/layout/brand-mark"
 import { PasswordField } from "@/app/(auth)/_components/password-field"
 
 function ResetPasswordForm() {
@@ -59,7 +58,7 @@ function ResetPasswordForm() {
         </div>
         <Link
           href="/forgot-password"
-          className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-zinc-200 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-emerald-300 hover:bg-emerald-50/50 hover:text-emerald-700"
+          className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-zinc-200 py-3 text-sm font-semibold sm:py-2.5 text-slate-700 transition-colors hover:border-sky-300 hover:bg-sky-50/60 hover:text-sky-700"
         >
           Request a new link
         </Link>
@@ -69,9 +68,9 @@ function ResetPasswordForm() {
 
   if (done) {
     return (
-      <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600" />
-        <p className="text-sm text-emerald-800">
+      <div className="flex items-start gap-3 rounded-xl border border-sky-200 bg-sky-50 p-4">
+        <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-sky-600" />
+        <p className="text-sm text-sky-900">
           Password updated. Taking you to sign in&hellip;
         </p>
       </div>
@@ -111,7 +110,7 @@ function ResetPasswordForm() {
       <Button
         type="submit"
         disabled={resetPassword.isPending}
-        className="w-full gap-1.5"
+        className="h-12 w-full gap-2 text-[0.9375rem] font-semibold sm:h-11"
       >
         {resetPassword.isPending ? (
           <Loader2 className="h-4 w-4 animate-spin" />
@@ -129,24 +128,14 @@ function ResetPasswordForm() {
 export default function ResetPasswordPage() {
   return (
     <div className="space-y-7">
-      <div className="flex items-center gap-3 lg:hidden">
-        <BrandMark />
-        <span className="flex items-center gap-1 text-lg font-extrabold tracking-tight text-slate-900">
-          AdFund<span className="font-medium text-emerald-600">Global</span>
-        </span>
-      </div>
-
-      <div>
-        <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-          <KeyRound className="h-5 w-5" />
-        </div>
-        <h1 className="text-3xl font-black tracking-tight text-slate-900">
+      <header className="space-y-2">
+        <h1 className="text-[1.75rem] leading-tight font-bold tracking-tight text-slate-900 sm:text-3xl">
           Choose a new password
         </h1>
-        <p className="mt-1.5 text-sm text-slate-500">
+        <p className="text-[0.9375rem] text-slate-500">
           Pick something you don&apos;t use anywhere else.
         </p>
-      </div>
+      </header>
 
       <React.Suspense
         fallback={<div className="h-40 animate-pulse rounded-xl bg-slate-100" />}
@@ -156,7 +145,7 @@ export default function ResetPasswordPage() {
 
       <Link
         href="/sign-in"
-        className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-zinc-200 py-2.5 text-sm font-semibold text-slate-700 transition-colors hover:border-emerald-300 hover:bg-emerald-50/50 hover:text-emerald-700"
+        className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-zinc-200 py-3 text-sm font-semibold sm:py-2.5 text-slate-700 transition-colors hover:border-sky-300 hover:bg-sky-50/60 hover:text-sky-700"
       >
         Back to sign in
       </Link>

@@ -33,12 +33,17 @@ export function PasswordField({
     <div className="space-y-1.5">
       <Label htmlFor={id}>{label}</Label>
       <div className="relative">
-        <Lock className="pointer-events-none absolute top-1/2 left-3 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
+        <Lock
+          aria-hidden
+          className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-slate-400"
+        />
         <Input
           id={id}
           type={visible ? "text" : "password"}
-          required
-          className="pr-10 pl-9"
+          autoComplete="current-password"
+          // Matches the email field: larger tap target on mobile, and a
+          // >=16px base size so iOS Safari doesn't zoom the page on focus.
+          className="h-12 pr-12 pl-11 sm:h-11"
           {...controlledProps}
         />
         <Button
@@ -46,12 +51,13 @@ export function PasswordField({
           variant="ghost"
           size="icon-sm"
           onClick={() => setVisible((v) => !v)}
-          className="absolute top-1/2 right-1 -translate-y-1/2 text-slate-400"
+          aria-label={visible ? "Hide password" : "Show password"}
+          className="absolute top-1/2 right-1.5 h-9 w-9 -translate-y-1/2 text-slate-400 hover:text-slate-600"
         >
           {visible ? (
-            <EyeOff className="h-3.5 w-3.5" />
+            <EyeOff aria-hidden className="h-4 w-4" />
           ) : (
-            <Eye className="h-3.5 w-3.5" />
+            <Eye aria-hidden className="h-4 w-4" />
           )}
         </Button>
       </div>

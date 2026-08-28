@@ -2,10 +2,10 @@
 
 import * as React from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
-import { ArrowRight, KeyRound, Loader2, Mail } from "lucide-react"
+import { ArrowRight, Loader2, Mail } from "lucide-react"
 import { toast } from "sonner"
 
 import { signInSchema, type SignInFormValues } from "@/schema/auth.schema"
@@ -15,11 +15,15 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
-import { BrandMark } from "@/components/layout/brand-mark"
 import { PasswordField } from "@/app/(auth)/_components/password-field"
 
-export default function SignInPage() {
+/**
+ * Split out from the page so `useSearchParams` sits under a Suspense
+ * boundary — without one it opts the whole route out of prerendering.
+ */
+function SignInForm() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const signIn = useSignIn()
 
   const {
@@ -34,89 +38,124 @@ export default function SignInPage() {
   async function onSubmit(values: SignInFormValues) {
     try {
       await signIn.mutateAsync(values)
-      router.replace("/admin")
+      // Return the user to whatever they were trying to reach.
+      const from = searchParams.get("from")
+      router.replace(from && from.startsWith("/admin") ? from : "/admin")
     } catch (error) {
       toast.error(getErrorMessage(error, "Could not sign in"))
     }
   }
 
   return (
-    <div className="space-y-7">
-      <div className="flex items-center gap-3 lg:hidden">
-        <BrandMark />
-        <span className="flex items-center gap-1 text-lg font-extrabold tracking-tight text-slate-900">
-          AdFund<span className="font-medium text-emerald-600">Global</span>
-        </span>
-      </div>
-
-      <div>
-        <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
-          <KeyRound className="h-5 w-5" />
-        </div>
-        <h1 className="text-3xl font-black tracking-tight text-slate-900">
+    <div className="space-y-8">
+      <header className="space-y-2">
+        <h1 className="text-[1.75rem] leading-tight font-bold tracking-tight text-slate-900 sm:text-3xl">
           Welcome back
         </h1>
-        <p className="mt-1.5 text-sm text-slate-500">
-          Enter your institutional credentials to access the CRM.
+        <p className="text-[0.9375rem] text-slate-500">
+          Sign in to access the treasury dashboard.
         </p>
-      </div>
+      </header>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
         <div className="space-y-1.5">
-          <Label htmlFor="email">Email Address</Label>
+          <Label htmlFor="email">Email address</Label>
           <div className="relative">
-            <Mail className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-slate-400" />
+            <Mail
+              aria-hidden
+              className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-slate-400"
+            />
             <Input
               id="email"
               type="email"
+              inputMode="email"
+              autoComplete="email"
+              autoCapitalize="none"
+              autoCorrect="off"
               placeholder="name@adfund.com"
-              className="pl-10"
+              aria-invalid={!!errors.email}
+              aria-describedby={errors.email ? "email-error" : undefined}
+              // h-12 on mobile keeps the tap target comfortable; the base
+              // font-size stays >=16px so iOS Safari doesn't zoom on focus.
+              className="h-12 pl-11 sm:h-11"
               {...register("email")}
             />
           </div>
           {errors.email && (
-            <p className="text-xs text-red-600">{errors.email.message}</p>
+            <p id="email-error" role="alert" className="text-xs text-red-600">
+              {errors.email.message}
+            </p>
           )}
         </div>
 
         <div className="space-y-1.5">
-          <PasswordField
-            id="password"
-            registration={register("password")}
-          />
+          <PasswordField id="password" registration={register("password")} />
           {errors.password && (
-            <p className="text-xs text-red-600">{errors.password.message}</p>
+            <p id="password-error" role="alert" className="text-xs text-red-600">
+              {errors.password.message}
+            </p>
           )}
         </div>
 
-        <div className="flex items-center justify-between text-xs">
-          <label className="flex items-center gap-2 text-slate-600">
+        <div className="flex flex-wrap items-center justify-between gap-3 text-sm">
+          <label className="flex cursor-pointer items-center gap-2 text-slate-600 select-none">
             <Checkbox defaultChecked />
             Keep me signed in
           </label>
           <Link
             href="/forgot-password"
-            className="font-semibold text-emerald-700 hover:text-emerald-800"
+            className="rounded font-semibold text-sky-700 underline-offset-4 transition-colors hover:text-sky-800 hover:underline focus-visible:ring-2 focus-visible:ring-sky-500/50 focus-visible:outline-none"
           >
             Forgot password?
           </Link>
         </div>
 
-        <Button type="submit" disabled={signIn.isPending} className="w-full gap-1.5">
+        <Button
+          type="submit"
+          disabled={signIn.isPending}
+          className="h-12 w-full gap-2 text-[0.9375rem] font-semibold sm:h-11"
+        >
           {signIn.isPending ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+            <>
+              <Loader2 aria-hidden className="h-4 w-4 animate-spin" />
+              Signing in…
+            </>
           ) : (
             <>
-              Sign In to Dashboard
-              <ArrowRight className="h-4 w-4" />
+              Sign in
+              <ArrowRight aria-hidden className="h-4 w-4" />
             </>
           )}
         </Button>
       </form>
 
-      <p className="text-center text-[11px] text-slate-400">
-        Protected by institutional 256-bit encryption &amp; audit logging.
+      <p className="border-t border-slate-100 pt-6 text-center text-xs text-slate-400">
+        Protected by 256-bit encryption and full audit logging.
       </p>
+    </div>
+  )
+}
+
+export default function SignInPage() {
+  return (
+    <React.Suspense fallback={<SignInFormSkeleton />}>
+      <SignInForm />
+    </React.Suspense>
+  )
+}
+
+function SignInFormSkeleton() {
+  return (
+    <div className="space-y-8" aria-hidden>
+      <div className="space-y-2">
+        <div className="h-8 w-48 rounded-md bg-slate-100" />
+        <div className="h-5 w-64 rounded-md bg-slate-100" />
+      </div>
+      <div className="space-y-5">
+        <div className="h-12 w-full rounded-lg bg-slate-100 sm:h-11" />
+        <div className="h-12 w-full rounded-lg bg-slate-100 sm:h-11" />
+        <div className="h-12 w-full rounded-lg bg-slate-100 sm:h-11" />
+      </div>
     </div>
   )
 }

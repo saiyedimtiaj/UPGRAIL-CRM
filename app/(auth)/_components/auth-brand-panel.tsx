@@ -1,83 +1,119 @@
-import { CheckCircle2, Sparkles } from "lucide-react"
+import { CheckCircle2, ShieldCheck } from "lucide-react"
 
-import { BrandMark } from "@/components/layout/brand-mark"
-import { Bdt } from "@/components/primitives/money"
+import { AuthLogo } from "@/app/(auth)/_components/auth-logo"
 
+/**
+ * Left-hand brand panel on desktop; a compact banner above the form on
+ * mobile. The palette follows the logo's blue/navy rather than the emerald
+ * used elsewhere, so the mark sits on its own ground instead of fighting it.
+ */
 export function AuthBrandPanel() {
   return (
-    <div className="emerald-ambient-mesh relative hidden flex-col justify-between overflow-hidden border-r border-white/10 bg-gradient-to-br from-[#0b2417] via-[#071910] to-[#020b06] p-12 lg:flex lg:w-1/2">
-      <div className="pointer-events-none absolute -top-24 -left-24 h-96 w-96 rounded-full bg-emerald-500/20 blur-3xl" />
-      <div className="pointer-events-none absolute top-1/2 -right-24 h-96 w-96 rounded-full bg-emerald-400/15 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 left-1/3 h-80 w-80 rounded-full bg-emerald-600/20 blur-3xl" />
-
-      <div className="relative z-10 flex items-center gap-3">
-        <BrandMark size="lg" />
-        <div>
-          <span className="flex items-center gap-1 text-2xl font-extrabold tracking-tight text-white">
-            AdFund<span className="font-medium text-emerald-400">Global</span>
-          </span>
-          <span className="block font-mono text-[11px] tracking-wider text-emerald-400/80 uppercase">
-            Institutional FX &amp; Ad Treasury
-          </span>
+    <>
+      {/* ---------- mobile: compact header ---------- */}
+      <div className="relative overflow-hidden bg-[#0b1524] px-5 pt-[calc(env(safe-area-inset-top)+1.75rem)] pb-7 sm:px-8 lg:hidden">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-20 -right-16 h-56 w-56 rounded-full bg-sky-500/20 blur-3xl"
+        />
+        <div className="relative flex items-center gap-3">
+          <AuthLogo size={40} priority />
+          <div className="min-w-0">
+            <p className="truncate text-base font-bold tracking-tight text-white">
+              AdFund Global
+            </p>
+            <p className="truncate font-mono text-[10px] tracking-[0.14em] text-sky-300/80 uppercase">
+              Institutional FX &amp; Ad Treasury
+            </p>
+          </div>
         </div>
       </div>
 
-      <div className="relative z-10 my-auto space-y-6 py-8">
-        <div className="space-y-3">
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-300">
-            <Sparkles className="h-3.5 w-3.5" />
-            <span>Full System Specification Compliant</span>
+      {/* ---------- desktop: full panel ---------- */}
+      <div className="relative hidden flex-col justify-between overflow-hidden bg-[#0b1524] p-10 lg:flex lg:w-1/2 xl:p-14">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -top-32 -left-24 h-[26rem] w-[26rem] rounded-full bg-sky-500/20 blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute top-1/3 -right-28 h-[24rem] w-[24rem] rounded-full bg-blue-500/15 blur-3xl"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute -bottom-28 left-1/4 h-80 w-80 rounded-full bg-teal-500/15 blur-3xl"
+        />
+
+        <div className="relative z-10 flex items-center gap-3.5">
+          <AuthLogo size={52} priority />
+          <div>
+            <p className="text-xl font-bold tracking-tight text-white">
+              AdFund Global
+            </p>
+            <p className="font-mono text-[10px] tracking-[0.16em] text-sky-300/80 uppercase">
+              Institutional FX &amp; Ad Treasury
+            </p>
           </div>
-          <h2 className="text-3xl leading-tight font-black tracking-tight text-white xl:text-4xl">
-            Real-time USD Sourcing &amp; <br />
-            <span className="bg-gradient-to-r from-emerald-300 via-emerald-400 to-teal-200 bg-clip-text text-transparent">
-              Audited Ad Account Spread
-            </span>
-          </h2>
-          <p className="max-w-lg text-sm leading-relaxed text-zinc-300">
-            Automated multi-tier currency finalization across direct BDT
-            sellers, card % rate conduits, and TRC20 USDT settlements.
-          </p>
         </div>
 
-        <div className="max-w-md space-y-4 rounded-2xl border border-emerald-500/30 bg-[#0e1c15]/90 p-5 shadow-2xl backdrop-blur-xl">
-          <div className="flex items-center justify-between border-b border-white/10 pb-3">
-            <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 animate-ping rounded-full bg-emerald-400" />
-              <span className="font-mono text-xs font-bold tracking-wider text-white uppercase">
-                Live Trading Engine
+        <div className="relative z-10 my-auto space-y-7 py-10">
+          <div className="space-y-4">
+            <h2 className="text-[2rem] leading-[1.12] font-bold tracking-tight text-white xl:text-[2.5rem]">
+              Real-time USD sourcing and
+              <br />
+              <span className="bg-gradient-to-r from-sky-300 via-cyan-300 to-teal-200 bg-clip-text text-transparent">
+                audited account spread
+              </span>
+            </h2>
+            <p className="max-w-md text-[0.9375rem] leading-relaxed text-slate-400">
+              Automated multi-tier currency finalization across direct BDT
+              sellers, card-rate conduits, and TRC20 USDT settlements.
+            </p>
+          </div>
+
+          <div className="max-w-md space-y-4 rounded-2xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm">
+            <div className="flex items-center justify-between gap-3 border-b border-white/10 pb-3.5">
+              <span className="flex items-center gap-2">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-sky-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-sky-400" />
+                </span>
+                <span className="font-mono text-[11px] font-semibold tracking-[0.12em] text-white uppercase">
+                  Live trading engine
+                </span>
+              </span>
+              <span className="rounded-md bg-sky-400/10 px-2 py-1 font-mono text-[11px] font-semibold text-sky-300 tabular-nums">
+                +৳3.30/USD
               </span>
             </div>
-            <span className="rounded bg-emerald-500/10 px-2 py-0.5 font-mono text-[11px] font-bold text-emerald-400">
-              +<Bdt value={3.3} /> / USD SPREAD
-            </span>
-          </div>
-          <div className="grid grid-cols-2 gap-4 text-xs">
-            <div>
-              <div className="text-zinc-400">Client Direct Rate</div>
-              <div className="mt-0.5 font-mono font-bold text-white">
-                <Bdt value={125.8} />
-                /$1
+            <dl className="grid grid-cols-2 gap-4">
+              <div>
+                <dt className="text-xs text-slate-400">Client direct rate</dt>
+                <dd className="mt-1 font-mono text-sm font-semibold text-white tabular-nums">
+                  ৳125.80<span className="text-slate-500">/$1</span>
+                </dd>
               </div>
-            </div>
-            <div>
-              <div className="text-zinc-400">Nazmul Sourcing Rate</div>
-              <div className="mt-0.5 font-mono font-bold text-white">
-                <Bdt value={122.5} />
-                /$1
+              <div>
+                <dt className="text-xs text-slate-400">Nazmul sourcing rate</dt>
+                <dd className="mt-1 font-mono text-sm font-semibold text-white tabular-nums">
+                  ৳122.50<span className="text-slate-500">/$1</span>
+                </dd>
               </div>
-            </div>
+            </dl>
           </div>
         </div>
-      </div>
 
-      <div className="relative z-10 flex items-center gap-2 text-xs text-emerald-400/80">
-        <CheckCircle2 className="h-3.5 w-3.5" />
-        <span>Immutable Audit Trail &amp; Role Permissions</span>
-        <span className="ml-auto font-mono text-[10px] text-zinc-500">
-          v2.4 Production Engine
-        </span>
+        <div className="relative z-10 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-slate-400">
+          <span className="flex items-center gap-1.5">
+            <CheckCircle2 className="h-3.5 w-3.5 text-sky-400" />
+            Immutable audit trail
+          </span>
+          <span className="flex items-center gap-1.5">
+            <ShieldCheck className="h-3.5 w-3.5 text-sky-400" />
+            Role-based permissions
+          </span>
+        </div>
       </div>
-    </div>
+    </>
   )
 }
