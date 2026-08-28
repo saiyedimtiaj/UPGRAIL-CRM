@@ -3,7 +3,7 @@ import "server-only"
 import { redirect } from "next/navigation"
 import { isAxiosError } from "axios"
 import { getMe } from "@/services/auth.api"
-import { getAuthTokenAction } from "@/lib/cookies"
+import { getAuthToken } from "@/lib/cookies"
 import type { TUser } from "@/types/auth.types"
 
 function isNextRedirectError(err: unknown): boolean {
@@ -13,7 +13,7 @@ function isNextRedirectError(err: unknown): boolean {
 
 export async function getCurrentUserOrRedirect(): Promise<TUser> {
   try {
-    const token = await getAuthTokenAction()
+    const token = await getAuthToken()
     if (!token) redirect("/sign-in")
 
     const user = await getMe()

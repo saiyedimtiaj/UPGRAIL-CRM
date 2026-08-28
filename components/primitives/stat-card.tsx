@@ -33,8 +33,9 @@ function useCountUp(value: number) {
       onUpdate: (v) => setDisplay(v),
     })
     return () => controls.stop()
-
-  }, [value])
+    // motionValue is a stable handle from useMotionValue; listing it satisfies
+    // the exhaustive-deps rule without changing when this re-runs.
+  }, [value, motionValue])
 
   return display
 }

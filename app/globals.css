@@ -126,9 +126,16 @@
     --chart-line: #059669;
 }
 
+/* The admin app ships light-only, by product decision.
+ *
+ * These tokens are intentionally retained (not dead code): every shadcn
+ * primitive references them, so they keep the component library internally
+ * consistent and make re-enabling dark mode a matter of mounting a theme
+ * provider. Note that doing so also requires migrating the remaining
+ * hardcoded `slate-*` / `emerald-*` utilities in the feature components to
+ * semantic tokens — until then, adding a toggle would render those elements
+ * unreadable. See README "Theming". */
 .dark {
-    /* Unused in the admin app (theme is forced light) — kept so shadcn
-     * components remain correct if dark mode is ever re-enabled later. */
     --background: oklch(0.145 0 0);
     --foreground: oklch(0.985 0 0);
     --card: oklch(0.205 0 0);

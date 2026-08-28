@@ -6,12 +6,9 @@ import { ProfitMetrics } from "@/app/(admin)/admin/profit/_ui/profit-metrics"
 import { LiquidityWarning } from "@/app/(admin)/admin/profit/_ui/liquidity-warning"
 import { WithdrawalForm } from "@/app/(admin)/admin/profit/_ui/withdrawal-form"
 import { WithdrawalHistory } from "@/app/(admin)/admin/profit/_ui/withdrawal-history"
-import ComingSoon from "@/components/shared/cooming-soon"
 
 export default function ProfitPage() {
   const { data: me } = useMe()
-
-    return <ComingSoon/>
 
   if (me?.role.name === "STAFF" && !me?.canViewProfit) {
     return (

@@ -8,7 +8,6 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { PAGE_SIZE } from "@/lib/pagination"
 import { AuditFilters } from "@/app/(admin)/admin/audit/_ui/audit-filters"
 import { AuditTable } from "@/app/(admin)/admin/audit/_ui/audit-table"
-import ComingSoon from "@/components/shared/cooming-soon"
 
 export default function AuditPage() {
   const [search, setSearch] = React.useState("")
@@ -33,8 +32,6 @@ export default function AuditPage() {
     search: debouncedSearch || undefined,
     action: action === "all" ? undefined : action,
   })
-
-    return <ComingSoon/>
 
   return (
     <div className="w-full space-y-5 p-4 sm:space-y-6 sm:p-6">

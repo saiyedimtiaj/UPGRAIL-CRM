@@ -1,29 +1,19 @@
-"use server"
+import "server-only"
 
 import { cookies } from "next/headers"
 
 const ACCESS_TOKEN_COOKIE = "access_token"
-const ACCESS_TOKEN_MAX_AGE_SECONDS = 60 * 24 * 60 * 60
 
-export async function setAuthTokenAction(token: string, maxAgeSeconds?: number) {
-  const cookieStore = await cookies()
-  cookieStore.set(ACCESS_TOKEN_COOKIE, token, {
-    path: "/",
-    maxAge: maxAgeSeconds ?? ACCESS_TOKEN_MAX_AGE_SECONDS,
-    sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
-    httpOnly: true,
-  })
-  return { success: true }
-}
-
-export async function getAuthTokenAction(): Promise<string | null> {
+/**
+ * Reads the auth cookie on the server.
+ *
+ * There is deliberately no setter here. The API is the only writer of this
+ * cookie: it issues the token and sets it in the same response. A second
+ * writer on the Next side used to create a *different* cookie of the same
+ * name on the app's origin, which the API could never see — the cause of the
+ * "logged in but every request 401s" failure in any non-localhost deploy.
+ */
+export async function getAuthToken(): Promise<string | null> {
   const cookieStore = await cookies()
   return cookieStore.get(ACCESS_TOKEN_COOKIE)?.value ?? null
-}
-
-export async function removeAuthTokenAction() {
-  const cookieStore = await cookies()
-  cookieStore.delete(ACCESS_TOKEN_COOKIE)
-  return { success: true }
 }

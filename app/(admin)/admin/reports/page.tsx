@@ -12,7 +12,6 @@ import {
 import { ReportSummary } from "@/app/(admin)/admin/reports/_ui/report-summary"
 import { ExportCard } from "@/app/(admin)/admin/reports/_ui/export-card"
 import { FilteredTradesTable } from "@/app/(admin)/admin/reports/_ui/filtered-trades-table"
-import ComingSoon from "@/components/shared/cooming-soon"
 
 
 export default function ReportsPage() {
@@ -26,11 +25,17 @@ export default function ReportsPage() {
     sellerId: "all",
   })
 
+  // Once the saved report window loads, widen the default range to match it —
+  // unless the user has already picked their own dates, which wins.
   const dateFromTouched = React.useRef(false)
+  const reportWindowDays = settings?.defaultReportWindowDays
   React.useEffect(() => {
-    if (dateFromTouched.current || !settings) return
-    setFilters((f) => ({ ...f, dateFrom: isoDaysAgo(settings.defaultReportWindowDays, today) }))
-  }, [settings?.defaultReportWindowDays])
+    if (dateFromTouched.current || reportWindowDays === undefined) return
+    setFilters((f) => ({
+      ...f,
+      dateFrom: isoDaysAgo(reportWindowDays, today),
+    }))
+  }, [reportWindowDays, today])
 
   const { data, isPending } = useTransactions({
     limit: 1000,
@@ -46,8 +51,6 @@ export default function ReportsPage() {
     dateFromTouched.current = true
     setFilters(next)
   }
-
-    return <ComingSoon/>
 
   return (
     <div className="w-full space-y-5 p-4 sm:space-y-6 sm:p-6">
