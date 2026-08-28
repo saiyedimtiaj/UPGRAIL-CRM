@@ -9,7 +9,6 @@ import { cn } from "@/lib/utils"
 import { countUpTransition } from "@/lib/animations"
 
 interface StatCardProps {
-
   tone?: "dark" | "light" | "mint"
   icon?: LucideIcon
   label: string
@@ -33,8 +32,6 @@ function useCountUp(value: number) {
       onUpdate: (v) => setDisplay(v),
     })
     return () => controls.stop()
-    // motionValue is a stable handle from useMotionValue; listing it satisfies
-    // the exhaustive-deps rule without changing when this re-runs.
   }, [value, motionValue])
 
   return display
@@ -72,7 +69,7 @@ export function StatCard({
         className
       )}
     >
-      {/* Ambient corner glow — dark cards only, purely decorative depth. */}
+      {}
       {tone === "dark" && (
         <div className="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full bg-emerald-500/10 blur-2xl" />
       )}

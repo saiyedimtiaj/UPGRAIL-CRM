@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
-
 const AUTH_ROUTES = ["/sign-in", "/forgot-password", "/reset-password"]
 const PROTECTED_PREFIX = "/admin"
 
@@ -30,9 +29,6 @@ export function proxy(request: NextRequest) {
   // with "Rendered more hooks than during the previous render." A hard
   // refresh never showed it because the redirect was already fully
   // resolved server-side before the client ever mounted anything.
-  //
-  // The page-level redirect in settings/page.tsx is kept as a fallback for
-  // direct hits that bypass this matcher; this one is what runs in practice.
   if (pathname === "/admin/settings") {
     const url = request.nextUrl.clone()
     url.pathname = "/admin/settings/team"

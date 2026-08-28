@@ -13,15 +13,6 @@ export const metadata: Metadata = {
   },
 }
 
-/**
- * Authentication is resolved here, on the server, before any markup is sent.
- *
- * The previous client-side <AuthGate> returned null until `useMe()` settled,
- * so every cold load was: blank page → download JS → hydrate → fetch /auth/me
- * → wait → finally render the shell. Doing it here means the sidebar and
- * topbar are in the first byte of HTML, and the resolved user is handed to
- * the client cache so nothing refetches it.
- */
 export default async function AdminGroupLayout({
   children,
 }: {
@@ -31,7 +22,7 @@ export default async function AdminGroupLayout({
 
   return (
     <AuthHydration user={user}>
-      <div className="bg-brand-canvas flex min-h-screen w-full">
+      <div className="flex min-h-screen w-full bg-brand-canvas">
         <Sidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <Topbar />

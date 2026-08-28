@@ -17,10 +17,6 @@ import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { PasswordField } from "@/app/(auth)/_components/password-field"
 
-/**
- * Split out from the page so `useSearchParams` sits under a Suspense
- * boundary — without one it opts the whole route out of prerendering.
- */
 function SignInForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -38,7 +34,7 @@ function SignInForm() {
   async function onSubmit(values: SignInFormValues) {
     try {
       await signIn.mutateAsync(values)
-      // Return the user to whatever they were trying to reach.
+
       const from = searchParams.get("from")
       router.replace(from && from.startsWith("/admin") ? from : "/admin")
     } catch (error) {
@@ -75,8 +71,7 @@ function SignInForm() {
               placeholder="name@adfund.com"
               aria-invalid={!!errors.email}
               aria-describedby={errors.email ? "email-error" : undefined}
-              // h-12 on mobile keeps the tap target comfortable; the base
-              // font-size stays >=16px so iOS Safari doesn't zoom on focus.
+
               className="h-12 pl-11 sm:h-11"
               {...register("email")}
             />
@@ -91,7 +86,11 @@ function SignInForm() {
         <div className="space-y-1.5">
           <PasswordField id="password" registration={register("password")} />
           {errors.password && (
-            <p id="password-error" role="alert" className="text-xs text-red-600">
+            <p
+              id="password-error"
+              role="alert"
+              className="text-xs text-red-600"
+            >
               {errors.password.message}
             </p>
           )}

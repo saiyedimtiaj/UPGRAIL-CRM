@@ -27,7 +27,11 @@ export function PasswordField({
 
   const controlledProps = registration
     ? { ...registration }
-    : { value, onChange: (e: React.ChangeEvent<HTMLInputElement>) => onChange?.(e.target.value) }
+    : {
+        value,
+        onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
+          onChange?.(e.target.value),
+      }
 
   return (
     <div className="space-y-1.5">
@@ -41,8 +45,7 @@ export function PasswordField({
           id={id}
           type={visible ? "text" : "password"}
           autoComplete="current-password"
-          // Matches the email field: larger tap target on mobile, and a
-          // >=16px base size so iOS Safari doesn't zoom the page on focus.
+
           className="h-12 pr-12 pl-11 sm:h-11"
           {...controlledProps}
         />

@@ -13,7 +13,6 @@ interface AvatarImageProps {
 export function AvatarImage({ src, name, className }: AvatarImageProps) {
   const [failed, setFailed] = React.useState(false)
 
-
   if (failed || !src) {
     return (
       <div
@@ -28,9 +27,6 @@ export function AvatarImage({ src, name, className }: AvatarImageProps) {
   }
 
   return (
-    // Deliberately a plain <img>: avatars come from arbitrary external URLs,
-    // which next/image would require an explicit remotePatterns allowlist for,
-    // and at this size the optimiser would cost more than it saves.
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={src}

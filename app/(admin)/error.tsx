@@ -5,14 +5,6 @@ import { AlertTriangle, RotateCcw } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 
-/**
- * Catches render-time exceptions inside the admin shell.
- *
- * Without this, a single throw in any page unmounted the entire UI to a blank
- * screen with no way back — unacceptable for a tool people use to move money.
- * The sidebar and topbar live in the layout above, so they survive and the
- * user can navigate elsewhere.
- */
 export default function AdminError({
   error,
   reset,
@@ -21,7 +13,6 @@ export default function AdminError({
   reset: () => void
 }) {
   React.useEffect(() => {
-    // Replace with your error reporter (Sentry et al) when one is wired up.
     console.error("Admin route error:", error)
   }, [error])
 

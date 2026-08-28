@@ -1,9 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton"
 
-/**
- * Streamed immediately while a route segment's server work resolves, so
- * navigation paints structure rather than leaving the last page frozen.
- */
 export default function AdminLoading() {
   return (
     <div className="w-full space-y-5 p-4 sm:space-y-6 sm:p-6">

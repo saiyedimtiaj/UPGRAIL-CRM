@@ -12,9 +12,6 @@ import {
 const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
-      // Pinned light to match the app. This previously read useTheme(), which
-      // — with no ThemeProvider mounted — defaulted to "system" and rendered
-      // dark toasts over a light UI for anyone whose OS was set to dark.
       theme="light"
       className="toaster group"
       icons={{

@@ -2,15 +2,10 @@ import { CheckCircle2, ShieldCheck } from "lucide-react"
 
 import { AuthLogo } from "@/app/(auth)/_components/auth-logo"
 
-/**
- * Left-hand brand panel on desktop; a compact banner above the form on
- * mobile. The palette follows the logo's blue/navy rather than the emerald
- * used elsewhere, so the mark sits on its own ground instead of fighting it.
- */
 export function AuthBrandPanel() {
   return (
     <>
-      {/* ---------- mobile: compact header ---------- */}
+      {}
       <div className="relative overflow-hidden bg-[#0b1524] px-5 pt-[calc(env(safe-area-inset-top)+1.75rem)] pb-7 sm:px-8 lg:hidden">
         <div
           aria-hidden
@@ -29,7 +24,7 @@ export function AuthBrandPanel() {
         </div>
       </div>
 
-      {/* ---------- desktop: full panel ---------- */}
+      {}
       <div className="relative hidden flex-col justify-between overflow-hidden bg-[#0b1524] p-10 lg:flex lg:w-1/2 xl:p-14">
         <div
           aria-hidden

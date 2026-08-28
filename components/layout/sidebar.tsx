@@ -14,7 +14,6 @@ import { AvatarImage } from "@/components/primitives/avatar-image"
 import { Skeleton } from "@/components/ui/skeleton"
 import Image from "next/image"
 
-
 export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const { data: currentUser, isPending: userPending } = useMe()
   const logoutMutation = useLogout()
@@ -29,10 +28,22 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
   return (
     <div className="flex h-full flex-col overflow-y-auto p-4 lg:overflow-visible lg:p-0">
-      <div className="space-y-4 lg:sticky lg:top-0 lg:z-10 lg:bg-brand-ink lg:p-3 pb-3 border-b border-white/5">
-        <div className="flex items-center gap-3 px-2 py-1">
-          <Image src="/logo.webp" alt="Logo" className="h-8 w-auto" width={100} height={100} />
-        </div>
+      <div className="space-y-4 border-b border-white/5 pb-3 lg:sticky lg:top-0 lg:z-10 lg:bg-brand-ink lg:p-3">
+        <Link
+          href="/admin"
+          onClick={onNavigate}
+          aria-label="AdFund Global — go to dashboard"
+          className="flex cursor-pointer items-center gap-3 rounded-lg px-2 py-1 transition-opacity hover:opacity-80 focus-visible:ring-2 focus-visible:ring-emerald-500/50 focus-visible:outline-none"
+        >
+          <Image
+            src="/logo.webp"
+            alt="AdFund Global"
+            className="h-8 w-auto"
+            width={100}
+            height={100}
+            priority
+          />
+        </Link>
       </div>
 
       <div className="flex-1 lg:overflow-y-auto lg:px-4">
@@ -40,7 +51,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           <SidebarNav onNavigate={onNavigate} />
         </div>
 
-        <div className="pt-2 mb-3">
+        <div className="mb-3 pt-2">
           <Link
             href={SETTINGS_NAV_ITEM.href}
             onClick={onNavigate}
@@ -113,7 +124,6 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
     </div>
   )
 }
-
 
 export function Sidebar() {
   return (

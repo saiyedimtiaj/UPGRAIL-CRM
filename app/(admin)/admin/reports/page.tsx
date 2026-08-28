@@ -13,7 +13,6 @@ import { ReportSummary } from "@/app/(admin)/admin/reports/_ui/report-summary"
 import { ExportCard } from "@/app/(admin)/admin/reports/_ui/export-card"
 import { FilteredTradesTable } from "@/app/(admin)/admin/reports/_ui/filtered-trades-table"
 
-
 export default function ReportsPage() {
   const today = todayISO()
   const { data: settings } = useSettings()
@@ -25,8 +24,6 @@ export default function ReportsPage() {
     sellerId: "all",
   })
 
-  // Once the saved report window loads, widen the default range to match it —
-  // unless the user has already picked their own dates, which wins.
   const dateFromTouched = React.useRef(false)
   const reportWindowDays = settings?.defaultReportWindowDays
   React.useEffect(() => {

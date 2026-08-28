@@ -1,12 +1,5 @@
 "use client"
 
-/**
- * Last-resort boundary for failures in the root layout itself.
- *
- * This replaces the entire document when it renders, so it must supply its
- * own <html> and <body> and cannot rely on any provider, font variable, or
- * global stylesheet — hence the inline styles.
- */
 export default function GlobalError({
   error,
   reset,
@@ -31,7 +24,9 @@ export default function GlobalError({
         }}
       >
         <div style={{ maxWidth: "28rem", textAlign: "center" }}>
-          <h1 style={{ fontSize: "1.25rem", fontWeight: 700, margin: "0 0 8px" }}>
+          <h1
+            style={{ fontSize: "1.25rem", fontWeight: 700, margin: "0 0 8px" }}
+          >
             AdFund Global is temporarily unavailable
           </h1>
           <p
