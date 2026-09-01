@@ -9,7 +9,7 @@ import { getErrorMessage } from "@/lib/handleError"
 import { Modal } from "@/components/primitives/modal"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/primitives/submit-button"
 
 
 function EditSettlementForm({
@@ -53,9 +53,14 @@ function EditSettlementForm({
           placeholder="Optional"
         />
       </div>
-      <Button type="submit" className="w-full">
+      <SubmitButton
+        type="submit"
+        className="w-full"
+        isSubmitting={updateSettlement.isPending}
+        pendingLabel="Saving…"
+      >
         Save Changes
-      </Button>
+      </SubmitButton>
     </form>
   )
 }

@@ -17,7 +17,7 @@ import { ClientCombobox } from "@/components/primitives/client-combobox"
 import { SellerCombobox } from "@/components/primitives/seller-combobox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/primitives/submit-button"
 
 interface LogPaymentModalProps {
   open: boolean
@@ -248,9 +248,14 @@ function PaymentForm({
           placeholder="Optional"
         />
       </div>
-      <Button type="submit" className="w-full" disabled={isSubmitting}>
-        {isSubmitting ? "Saving..." : isEdit ? "Save Changes" : "Log Payment"}
-      </Button>
+      <SubmitButton
+        type="submit"
+        className="w-full"
+        isSubmitting={isSubmitting}
+        pendingLabel="Saving…"
+      >
+        {isEdit ? "Save Changes" : "Log Payment"}
+      </SubmitButton>
     </form>
   )
 }

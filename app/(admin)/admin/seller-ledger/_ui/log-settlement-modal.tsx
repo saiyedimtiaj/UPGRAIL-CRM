@@ -15,7 +15,7 @@ import { Modal } from "@/components/primitives/modal"
 import { Alert } from "@/components/shared/alert"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/primitives/submit-button"
 import { Bdt } from "@/components/primitives/money"
 
 interface LogSettlementModalProps {
@@ -152,9 +152,15 @@ export function LogSettlementModal({
           </div>
         )}
 
-        <Button type="submit" className="w-full" disabled={!conduitSeller}>
+        <SubmitButton
+          type="submit"
+          className="w-full"
+          disabled={!conduitSeller}
+          isSubmitting={createSettlement.isPending}
+          pendingLabel="Logging settlement…"
+        >
           Log Settlement
-        </Button>
+        </SubmitButton>
       </form>
     </Modal>
   )

@@ -11,7 +11,7 @@ import { Modal } from "@/components/primitives/modal"
 import { SelectField } from "@/components/primitives/select-field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/primitives/submit-button"
 import { PasswordField } from "@/app/(auth)/_components/password-field"
 
 function UserForm({
@@ -118,9 +118,14 @@ function UserForm({
           ]}
         />
       </div>
-      <Button type="submit" disabled={isPending} className="w-full">
+      <SubmitButton
+        type="submit"
+        className="w-full"
+        isSubmitting={isPending}
+        pendingLabel={mode === "edit" ? "Saving…" : "Adding member…"}
+      >
         {mode === "edit" ? "Save Changes" : "Add Team Member"}
-      </Button>
+      </SubmitButton>
     </form>
   )
 }

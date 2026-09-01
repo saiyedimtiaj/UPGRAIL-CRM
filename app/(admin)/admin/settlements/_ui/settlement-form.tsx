@@ -16,7 +16,7 @@ import { SearchableSelect } from "@/components/primitives/searchable-select"
 import { Alert } from "@/components/shared/alert"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/primitives/submit-button"
 import { Usdt } from "@/components/primitives/money"
 import type { AllocationOverride } from "@/services/settlements.api"
 
@@ -253,13 +253,15 @@ export function SettlementForm() {
           </div>
         ) : null}
 
-        <Button
+        <SubmitButton
           type="submit"
           className="w-full"
-          disabled={!conduitSeller || createSettlement.isPending}
+          disabled={!conduitSeller}
+          isSubmitting={createSettlement.isPending}
+          pendingLabel="Logging settlement…"
         >
           Log Settlement
-        </Button>
+        </SubmitButton>
       </form>
     </SectionCard>
   )

@@ -98,6 +98,7 @@ export function NazmulRatesCard({ date }: { date: string }) {
               onChange={setUsdt}
               onSave={() => save(usdt)}
               disabled={!conduitSeller}
+              isSaving={upsertRate.isPending}
             />
             {!!impact?.alreadyPricedCount && (
               <Alert

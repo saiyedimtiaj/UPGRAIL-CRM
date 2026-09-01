@@ -9,7 +9,7 @@ import { getErrorMessage } from "@/lib/handleError"
 import { Modal } from "@/components/primitives/modal"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/primitives/submit-button"
 
 function ClientForm({
   mode,
@@ -92,13 +92,14 @@ function ClientForm({
           placeholder="Dhaka, BD"
         />
       </div>
-      <Button
+      <SubmitButton
         type="submit"
         className="w-full"
-        disabled={createClient.isPending || updateClient.isPending}
+        isSubmitting={createClient.isPending || updateClient.isPending}
+        pendingLabel={mode === "edit" ? "Saving…" : "Adding client…"}
       >
         {mode === "edit" ? "Save Changes" : "Add Client"}
-      </Button>
+      </SubmitButton>
     </form>
   )
 }

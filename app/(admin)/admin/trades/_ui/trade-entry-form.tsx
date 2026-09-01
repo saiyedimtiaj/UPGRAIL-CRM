@@ -13,12 +13,12 @@ import { useConfetti } from "@/hooks/use-confetti"
 import { findConduitUsdtRate, findRateValue } from "@/lib/calc/rates"
 import { Bdt } from "@/components/primitives/money"
 import { SectionCard } from "@/components/primitives/section-card"
+import { SubmitButton } from "@/components/primitives/submit-button"
 import { ClientCombobox } from "@/components/primitives/client-combobox"
 import { SellerCombobox } from "@/components/primitives/seller-combobox"
 import { TradePreviewStrip } from "@/app/(admin)/admin/trades/_ui/trade-preview-strip"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
 
 export function TradeEntryForm() {
   const { data: clients = [] } = useActiveClients()
@@ -210,9 +210,14 @@ export function TradeEntryForm() {
           />
         )}
 
-        <Button type="submit" className="w-full sm:w-auto">
+        <SubmitButton
+          type="submit"
+          className="w-full sm:w-auto"
+          isSubmitting={createTransaction.isPending}
+          pendingLabel="Logging trade…"
+        >
           Log Trade
-        </Button>
+        </SubmitButton>
       </form>
     </SectionCard>
   )

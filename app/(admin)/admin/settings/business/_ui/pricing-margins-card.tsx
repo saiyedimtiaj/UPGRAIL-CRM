@@ -12,7 +12,7 @@ import { SectionCard } from "@/components/primitives/section-card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/primitives/submit-button"
 
 function PricingMarginsForm({ settings, isOwner }: { settings: BusinessSettings; isOwner: boolean }) {
   const updateSettings = useUpdateSettings()
@@ -53,9 +53,14 @@ function PricingMarginsForm({ settings, isOwner }: { settings: BusinessSettings;
         </div>
       </div>
       {isOwner && (
-        <Button type="submit" disabled={updateSettings.isPending} size="sm">
+        <SubmitButton
+          type="submit"
+          size="sm"
+          isSubmitting={updateSettings.isPending}
+          pendingLabel="Saving…"
+        >
           Save
-        </Button>
+        </SubmitButton>
       )}
     </form>
   )

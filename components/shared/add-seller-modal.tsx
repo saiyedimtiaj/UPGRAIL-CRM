@@ -10,7 +10,7 @@ import { Modal } from "@/components/primitives/modal"
 import { SelectField } from "@/components/primitives/select-field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/primitives/submit-button"
 
 function SellerForm({
   mode,
@@ -113,13 +113,14 @@ function SellerForm({
           />
         </div>
       </div>
-      <Button
+      <SubmitButton
         type="submit"
         className="w-full"
-        disabled={createSeller.isPending || updateSeller.isPending}
+        isSubmitting={createSeller.isPending || updateSeller.isPending}
+        pendingLabel={mode === "edit" ? "Saving…" : "Adding seller…"}
       >
         {mode === "edit" ? "Save Changes" : "Add Seller"}
-      </Button>
+      </SubmitButton>
     </form>
   )
 }

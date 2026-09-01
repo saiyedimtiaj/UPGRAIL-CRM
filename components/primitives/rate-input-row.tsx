@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Save } from "lucide-react"
+import { Loader2, Save } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -15,6 +15,7 @@ interface RateInputRowProps {
   tone?: "dark" | "light"
   prefix?: React.ReactNode
   disabled?: boolean
+  isSaving?: boolean
 }
 
 export function RateInputRow({
@@ -26,7 +27,10 @@ export function RateInputRow({
   tone = "light",
   prefix,
   disabled,
+  isSaving = false,
 }: RateInputRowProps) {
+  const isBusy = disabled || isSaving
+
   return (
     <div className="flex items-center gap-3">
       {prefix}
@@ -55,7 +59,13 @@ export function RateInputRow({
         step="0.01"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        disabled={disabled}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !isBusy) {
+            e.preventDefault()
+            onSave()
+          }
+        }}
+        disabled={isBusy}
         className={cn(
           "w-28 font-mono",
           tone === "dark" &&
@@ -66,9 +76,15 @@ export function RateInputRow({
         size="icon-sm"
         variant={tone === "dark" ? "secondary" : "outline"}
         onClick={onSave}
-        disabled={disabled}
+        disabled={isBusy}
+        aria-busy={isSaving}
+        aria-label={isSaving ? `Saving ${label} rate` : `Save ${label} rate`}
       >
-        <Save className="h-3.5 w-3.5" />
+        {isSaving ? (
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+        ) : (
+          <Save className="h-3.5 w-3.5" />
+        )}
       </Button>
     </div>
   )

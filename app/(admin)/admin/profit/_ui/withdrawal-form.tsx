@@ -10,7 +10,7 @@ import { useConfetti } from "@/hooks/use-confetti"
 import { SectionCard } from "@/components/primitives/section-card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/primitives/submit-button"
 import { Bdt } from "@/components/primitives/money"
 
 export function WithdrawalForm() {
@@ -94,13 +94,15 @@ export function WithdrawalForm() {
             </p>
           </div>
         )}
-        <Button
+        <SubmitButton
           type="submit"
-          disabled={profitRemaining <= 0 || createTransfer.isPending}
+          disabled={profitRemaining <= 0}
           className="w-full"
+          isSubmitting={createTransfer.isPending}
+          pendingLabel="Processing…"
         >
           Take Out Profit
-        </Button>
+        </SubmitButton>
       </form>
     </SectionCard>
   )

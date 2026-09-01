@@ -10,7 +10,7 @@ import { Modal } from "@/components/primitives/modal"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/primitives/submit-button"
 
 function EditTransactionForm({
   transaction,
@@ -64,9 +64,14 @@ function EditTransactionForm({
           placeholder="Optional"
         />
       </div>
-      <Button type="submit" className="w-full">
+      <SubmitButton
+        type="submit"
+        className="w-full"
+        isSubmitting={updateTransaction.isPending}
+        pendingLabel="Saving…"
+      >
         Save Changes
-      </Button>
+      </SubmitButton>
     </form>
   )
 }

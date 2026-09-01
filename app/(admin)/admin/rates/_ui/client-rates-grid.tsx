@@ -73,6 +73,7 @@ function ClientRateRow({
         value={value}
         onChange={onDraftChange}
         onSave={save}
+        isSaving={upsertRate.isPending}
       />
       {!!impact?.alreadyPricedCount && (
         <p className="flex items-center gap-1 pl-1 text-[10px] font-semibold text-amber-600">

@@ -10,7 +10,7 @@ import { useConfetti } from "@/hooks/use-confetti"
 import { SelectField } from "@/components/primitives/select-field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/primitives/submit-button"
 import { Bdt } from "@/components/primitives/money"
 
 const DESTINATION_OPTIONS = [
@@ -177,13 +177,15 @@ export function TransferForm({ onDone }: TransferFormProps) {
           </div>
         ) : null}
 
-        <Button
+        <SubmitButton
           type="submit"
           className="w-full"
-          disabled={sameDestination || createTransfer.isPending}
+          disabled={sameDestination}
+          isSubmitting={createTransfer.isPending}
+          pendingLabel="Transferring…"
         >
           Transfer Funds
-        </Button>
+        </SubmitButton>
       </form>
   )
 }

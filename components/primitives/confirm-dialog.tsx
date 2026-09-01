@@ -4,6 +4,7 @@ import * as React from "react"
 
 import { Modal } from "@/components/primitives/modal"
 import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/primitives/submit-button"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 
@@ -18,6 +19,12 @@ interface ConfirmDialogProps {
   destructive?: boolean
   confirmLabel?: string
   onConfirm: (reason?: string) => void
+  /**
+   * Keeps the dialog open and shows a spinner while the action runs. Omit it
+   * for actions that resolve instantly — the dialog then closes on confirm as
+   * before.
+   */
+  isConfirming?: boolean
 }
 
 export function ConfirmDialog({
@@ -30,12 +37,16 @@ export function ConfirmDialog({
   destructive = false,
   confirmLabel = "Confirm",
   onConfirm,
+  isConfirming = false,
 }: ConfirmDialogProps) {
   const [reason, setReason] = React.useState("")
 
   const canConfirm = !requireReason || reason.trim().length > 0
 
   function handleOpenChange(next: boolean) {
+    // Ignore dismissals while the action is in flight so the user cannot
+    // close the dialog out from under a running request.
+    if (isConfirming && !next) return
     onOpenChange(next)
     if (!next) setReason("")
   }
@@ -51,21 +62,23 @@ export function ConfirmDialog({
           <Button
             variant="outline"
             className="w-full sm:w-auto"
+            disabled={isConfirming}
             onClick={() => handleOpenChange(false)}
           >
             Cancel
           </Button>
-          <Button
+          <SubmitButton
             variant={destructive ? "destructive" : "default"}
             disabled={!canConfirm}
+            isSubmitting={isConfirming}
             className="w-full sm:w-auto"
             onClick={() => {
               onConfirm(requireReason ? reason.trim() : undefined)
-              handleOpenChange(false)
+              if (!isConfirming) handleOpenChange(false)
             }}
           >
             {confirmLabel}
-          </Button>
+          </SubmitButton>
         </>
       }
     >

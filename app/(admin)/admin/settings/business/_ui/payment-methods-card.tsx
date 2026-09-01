@@ -14,6 +14,7 @@ import { SelectField } from "@/components/primitives/select-field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { SubmitButton } from "@/components/primitives/submit-button"
 
 function PaymentMethodsForm({ settings, isOwner }: { settings: BusinessSettings; isOwner: boolean }) {
   const updateSettings = useUpdateSettings()
@@ -113,9 +114,15 @@ function PaymentMethodsForm({ settings, isOwner }: { settings: BusinessSettings;
             />
           </div>
 
-          <Button type="button" onClick={handleSave} disabled={updateSettings.isPending} size="sm">
+          <SubmitButton
+            type="button"
+            onClick={handleSave}
+            size="sm"
+            isSubmitting={updateSettings.isPending}
+            pendingLabel="Saving…"
+          >
             Save
-          </Button>
+          </SubmitButton>
         </>
       )}
     </div>
