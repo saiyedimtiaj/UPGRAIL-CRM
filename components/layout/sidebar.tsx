@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
 import { motion } from "motion/react"
 import { LogOut } from "lucide-react"
+import { toast } from "sonner"
 
 import { cn } from "@/lib/utils"
 import { NAV_INDICATOR_ID } from "@/lib/animations"
@@ -22,7 +23,14 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const isSettingsActive = pathname.startsWith(SETTINGS_NAV_ITEM.href)
 
   async function handleLogout() {
-    await logoutMutation.mutateAsync().catch(() => undefined)
+    try {
+      await logoutMutation.mutateAsync()
+      toast.success("Signed out.")
+    } catch {
+      // The local session is cleared either way (useLogout uses onSettled),
+      // so the user still ends up signed out — just say so plainly.
+      toast.error("Signed out locally, but the server could not be reached.")
+    }
     router.push("/sign-in")
   }
 

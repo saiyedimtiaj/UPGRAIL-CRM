@@ -33,7 +33,12 @@ function SignInForm() {
 
   async function onSubmit(values: SignInFormValues) {
     try {
-      await signIn.mutateAsync(values)
+      const result = await signIn.mutateAsync(values)
+
+      const firstName = result.user.name.trim().split(" ")[0]
+      toast.success(
+        firstName ? `Welcome back, ${firstName}.` : "Signed in successfully."
+      )
 
       const from = searchParams.get("from")
       router.replace(from && from.startsWith("/admin") ? from : "/admin")
