@@ -16,6 +16,7 @@ import { SearchableSelect } from "@/components/primitives/searchable-select"
 import { Alert } from "@/components/shared/alert"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { DatePicker } from "@/components/ui/date-picker"
 import { SubmitButton } from "@/components/primitives/submit-button"
 import { Usdt } from "@/components/primitives/money"
 import type { AllocationOverride } from "@/services/settlements.api"
@@ -159,11 +160,10 @@ export function SettlementForm() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="settlement-date">Settlement Date</Label>
-            <Input
+            <DatePicker
               id="settlement-date"
-              type="date"
               value={date}
-              onChange={(e) => setDate(e.target.value)}
+              onChange={(value) => setDate(value)}
             />
             <p className="text-[11px] text-slate-400">
               The USDT rate for this date must already be on file (Rates screen).

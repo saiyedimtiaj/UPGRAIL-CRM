@@ -10,9 +10,9 @@ import { useTransactions } from "@/features/use-transactions"
 import { useMe } from "@/features/use-auth"
 import { getErrorMessage } from "@/lib/handleError"
 import { SectionCard } from "@/components/primitives/section-card"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
+import { DatePicker } from "@/components/ui/date-picker"
 import { NazmulRatesCard } from "@/app/(admin)/admin/rates/_ui/nazmul-rates-card"
 import { ClientRatesGrid } from "@/app/(admin)/admin/rates/_ui/client-rates-grid"
 
@@ -64,11 +64,10 @@ export default function RatesPage() {
         <div className="flex flex-wrap items-end justify-between gap-4">
           <div className="space-y-1.5">
             <Label htmlFor="rate-date">Rate Date</Label>
-            <Input
+            <DatePicker
               id="rate-date"
-              type="date"
               value={date}
-              onChange={(e) => setDate(e.target.value)}
+              onChange={(value) => setDate(value)}
               className="w-48"
             />
           </div>

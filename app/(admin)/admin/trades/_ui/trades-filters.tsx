@@ -7,6 +7,7 @@ import { SelectField } from "@/components/primitives/select-field"
 import { SearchableSelect } from "@/components/primitives/searchable-select"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { DatePicker } from "@/components/ui/date-picker"
 
 export interface TradesFiltersState {
   search: string
@@ -57,20 +58,18 @@ export function TradesFilters({ value, onChange, clients, sellers }: TradesFilte
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="trades-from">Date From</Label>
-        <Input
+        <DatePicker
           id="trades-from"
-          type="date"
           value={value.dateFrom}
-          onChange={(e) => onChange({ ...value, dateFrom: e.target.value })}
+          onChange={(next) => onChange({ ...value, dateFrom: next })}
         />
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="trades-to">Date To</Label>
-        <Input
+        <DatePicker
           id="trades-to"
-          type="date"
           value={value.dateTo}
-          onChange={(e) => onChange({ ...value, dateTo: e.target.value })}
+          onChange={(next) => onChange({ ...value, dateTo: next })}
         />
       </div>
       <div className="space-y-1.5">

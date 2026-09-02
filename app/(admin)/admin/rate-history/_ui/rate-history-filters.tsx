@@ -2,8 +2,8 @@
 
 import type { PartyType, RateKind } from "@/lib/types"
 import { SelectField } from "@/components/primitives/select-field"
-import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { DatePicker } from "@/components/ui/date-picker"
 
 export interface RateHistoryFiltersState {
   dateFrom: string
@@ -35,20 +35,18 @@ export function RateHistoryFilters({ value, onChange }: RateHistoryFiltersProps)
     <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <div className="space-y-1.5">
         <Label htmlFor="rate-history-from">Date From</Label>
-        <Input
+        <DatePicker
           id="rate-history-from"
-          type="date"
           value={value.dateFrom}
-          onChange={(e) => onChange({ ...value, dateFrom: e.target.value })}
+          onChange={(next) => onChange({ ...value, dateFrom: next })}
         />
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="rate-history-to">Date To</Label>
-        <Input
+        <DatePicker
           id="rate-history-to"
-          type="date"
           value={value.dateTo}
-          onChange={(e) => onChange({ ...value, dateTo: e.target.value })}
+          onChange={(next) => onChange({ ...value, dateTo: next })}
         />
       </div>
       <div className="space-y-1.5">

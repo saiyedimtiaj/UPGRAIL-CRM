@@ -15,6 +15,7 @@ import { Modal } from "@/components/primitives/modal"
 import { Alert } from "@/components/shared/alert"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { DatePicker } from "@/components/ui/date-picker"
 import { SubmitButton } from "@/components/primitives/submit-button"
 import { Bdt } from "@/components/primitives/money"
 
@@ -103,11 +104,10 @@ export function LogSettlementModal({
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <div className="space-y-1.5">
             <Label htmlFor="settlement-date">Date</Label>
-            <Input
+            <DatePicker
               id="settlement-date"
-              type="date"
               value={date}
-              onChange={(e) => setDate(e.target.value)}
+              onChange={(value) => setDate(value)}
             />
           </div>
           <div className="space-y-1.5">

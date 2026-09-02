@@ -6,6 +6,7 @@ import type { PaymentDirection, PaymentPartyType } from "@/lib/types"
 import { SelectField } from "@/components/primitives/select-field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { DatePicker } from "@/components/ui/date-picker"
 
 export interface PaymentsFiltersState {
   search: string
@@ -50,20 +51,18 @@ export function PaymentsFilters({ value, onChange }: PaymentsFiltersProps) {
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="payments-from">Date From</Label>
-        <Input
+        <DatePicker
           id="payments-from"
-          type="date"
           value={value.dateFrom}
-          onChange={(e) => onChange({ ...value, dateFrom: e.target.value })}
+          onChange={(next) => onChange({ ...value, dateFrom: next })}
         />
       </div>
       <div className="space-y-1.5">
         <Label htmlFor="payments-to">Date To</Label>
-        <Input
+        <DatePicker
           id="payments-to"
-          type="date"
           value={value.dateTo}
-          onChange={(e) => onChange({ ...value, dateTo: e.target.value })}
+          onChange={(next) => onChange({ ...value, dateTo: next })}
         />
       </div>
       <div className="space-y-1.5">

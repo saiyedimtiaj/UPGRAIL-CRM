@@ -19,6 +19,7 @@ import { SellerCombobox } from "@/components/primitives/seller-combobox"
 import { TradePreviewStrip } from "@/app/(admin)/admin/trades/_ui/trade-preview-strip"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { DatePicker } from "@/components/ui/date-picker"
 
 export function TradeEntryForm() {
   const { data: clients = [] } = useActiveClients()
@@ -99,10 +100,9 @@ export function TradeEntryForm() {
     <SectionCard
       title="Quick Trade Entry Form"
       action={
-        <Input
-          type="date"
+        <DatePicker
           value={date}
-          onChange={(e) => setDate(e.target.value)}
+          onChange={(value) => setDate(value)}
           className="w-36 sm:w-40"
         />
       }
