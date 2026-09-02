@@ -32,23 +32,24 @@ export function SettlementForm() {
 
   const externalSellers = sellers.filter((s) => !s.isSettlementConduit)
 
-  const [sellerId, setSellerId] = React.useState<number | undefined>(
-    externalSellers[0]?.id
-  )
+  // Sellers arrive from a query, so the first render has none. The initial
+  // value alone would latch undefined forever and leave the form with no
+  // seller selected — fall back to the first external seller once they load.
+  const [sellerId, setSellerId] = React.useState<number | undefined>(undefined)
+  const effectiveSellerId = sellerId ?? externalSellers[0]?.id
   const [date, setDate] = React.useState(todayISO())
   const [usdtAmount, setUsdtAmount] = React.useState("")
   const [note, setNote] = React.useState("")
   const [overrides, setOverrides] = React.useState<Record<number, string> | null>(null)
 
   const numAmount = Number(usdtAmount) || undefined
-  const { data: proposal = [], isFetching: previewLoading } = usePreviewAllocation(
-    sellerId,
+  const { data: preview, isFetching: previewLoading } = usePreviewAllocation(
+    effectiveSellerId,
     numAmount
   )
+  const proposal = preview?.allocations ?? []
 
-
-
-  const inputsKey = `${sellerId ?? ""}:${usdtAmount}`
+  const inputsKey = `${effectiveSellerId ?? ""}:${usdtAmount}`
   const [overridesFor, setOverridesFor] = React.useState(inputsKey)
   if (overridesFor !== inputsKey) {
     setOverridesFor(inputsKey)
@@ -64,7 +65,12 @@ export function SettlementForm() {
 
   const allocatedTotal = rows.reduce((sum, r) => sum + (r.allocated_usdt || 0), 0)
   const isOverridden = overrides !== null
-  const selectedSeller = sellers.find((s) => s.id === sellerId)
+  const selectedSeller = sellers.find((s) => s.id === effectiveSellerId)
+
+  const allocationSumMatches =
+    numAmount !== undefined && Math.abs(allocatedTotal - numAmount) <= 0.000001
+  const exceedsOutstanding = !isOverridden && !!preview?.exceeds_outstanding
+  const maxSettleable = preview?.max_settleable_usdt ?? 0
 
   function updateOverride(transactionId: number, value: string) {
     setOverrides((prev) => {
@@ -80,9 +86,19 @@ export function SettlementForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const num = Number(usdtAmount)
-    if (!num || !sellerId) return
+    if (!num || !effectiveSellerId) return
     if (!conduitSeller) {
       toast.error("No settlement conduit is configured yet.")
+      return
+    }
+    if (exceedsOutstanding) {
+      toast.error(
+        `This settlement exceeds what ${selectedSeller?.name ?? "this seller"} is owed. The maximum is ${maxSettleable.toLocaleString()} USDT.`
+      )
+      return
+    }
+    if (isOverridden && !allocationSumMatches) {
+      toast.error("Allocations must sum exactly to the settled amount.")
       return
     }
 
@@ -95,7 +111,7 @@ export function SettlementForm() {
     try {
       await createSettlement.mutateAsync({
         date,
-        sellerId,
+        sellerId: effectiveSellerId,
         usdtAmount: num,
         note: note || undefined,
         allocations,
@@ -129,7 +145,7 @@ export function SettlementForm() {
           <Label htmlFor="settlement-seller">External Seller</Label>
           <SearchableSelect
             id="settlement-seller"
-            value={sellerId}
+            value={effectiveSellerId}
             onChange={setSellerId}
             searchPlaceholder="Search sellers..."
             options={externalSellers.map((s) => ({
@@ -189,6 +205,18 @@ export function SettlementForm() {
           />
         </div>
 
+        {exceedsOutstanding && selectedSeller ? (
+          <Alert
+            variant="error"
+            title="Settlement exceeds outstanding USDT due"
+            message={`${selectedSeller.name} is currently owed ${maxSettleable.toLocaleString()} USDT. This settlement is over by ${(preview?.unallocated_usdt ?? 0).toLocaleString()} USDT, which has no open trade to settle against.`}
+            action={{
+              label: `Use maximum (${maxSettleable.toLocaleString()} USDT)`,
+              onClick: () => setUsdtAmount(String(maxSettleable)),
+            }}
+          />
+        ) : null}
+
         {selectedSeller && numAmount ? (
           <div className="space-y-2 rounded-xl bg-slate-50 p-4">
             <div className="flex items-center justify-between">
@@ -235,15 +263,13 @@ export function SettlementForm() {
                   <span>Allocated Total</span>
                   <span
                     className={
-                      Math.abs(allocatedTotal - numAmount) > 0.000001
-                        ? "text-rose-600"
-                        : "text-emerald-700"
+                      allocationSumMatches ? "text-emerald-700" : "text-rose-600"
                     }
                   >
                     <Usdt value={allocatedTotal} /> / <Usdt value={numAmount} />
                   </span>
                 </div>
-                {Math.abs(allocatedTotal - numAmount) > 0.000001 && (
+                {!allocationSumMatches && (
                   <p className="text-[11px] text-rose-600">
                     Allocation must sum exactly to the settled amount.
                   </p>
@@ -256,7 +282,11 @@ export function SettlementForm() {
         <SubmitButton
           type="submit"
           className="w-full"
-          disabled={!conduitSeller}
+          disabled={
+            !conduitSeller ||
+            exceedsOutstanding ||
+            (isOverridden && !allocationSumMatches)
+          }
           isSubmitting={createSettlement.isPending}
           pendingLabel="Logging settlement…"
         >

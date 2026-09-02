@@ -24,10 +24,21 @@ export interface AllocationProposalRow {
   allocated_usdt: number
 }
 
+export interface AllocationPreview {
+  allocations: AllocationProposalRow[]
+  requested_usdt: number
+  allocated_usdt: number
+  /** Amount no open trade could absorb; > 0 means the settlement overshoots. */
+  unallocated_usdt: number
+  /** Largest settlement this seller can absorb right now. */
+  max_settleable_usdt: number
+  exceeds_outstanding: boolean
+}
+
 export async function previewAllocation(
   sellerId: number,
   usdtAmount: number,
-): Promise<AllocationProposalRow[]> {
+): Promise<AllocationPreview> {
   const { data } = await api.get("/settlements/preview-allocation", {
     params: { sellerId, usdtAmount },
   })
