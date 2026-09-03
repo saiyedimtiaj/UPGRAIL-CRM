@@ -7,7 +7,7 @@ import { shortDate } from "@/lib/date"
 import { useTransfers, useVoidTransfer } from "@/features/use-transfers"
 import { useMe } from "@/features/use-auth"
 import { getErrorMessage } from "@/lib/handleError"
-import { PAGE_SIZE, toDataTablePagination } from "@/lib/pagination"
+import { PAGE_SIZE } from "@/lib/pagination"
 import { SectionCard } from "@/components/primitives/section-card"
 import DataTable, {
   type DataTableColumn,
@@ -25,13 +25,21 @@ const DESTINATION_LABEL: Record<string, string> = {
 
 export function WithdrawalHistory() {
   const [page, setPage] = React.useState(1)
-  const { data, isPending } = useTransfers({ page, limit: PAGE_SIZE })
+  // Profit Bank rows used to be filtered out of an already-paginated page,
+  // so "showing 1-25 of 60" could sit above three visible rows. Fetch the
+  // set, filter, then paginate what is left, so the two agree.
+  const { data, isPending } = useTransfers({ page: 1, limit: 500 })
   const { data: me } = useMe()
   const voidTransfer = useVoidTransfer()
-  const allTransfers = data?.data ?? []
 
-  const transfers = allTransfers.filter(
-    (t) => t.from_destination === "PROFIT_BANK" || t.to_destination === "PROFIT_BANK"
+  const profitBankTransfers = (data?.data ?? []).filter(
+    (t) =>
+      t.from_destination === "PROFIT_BANK" || t.to_destination === "PROFIT_BANK"
+  )
+  const totalCount = profitBankTransfers.length
+  const transfers = profitBankTransfers.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE
   )
   const [voidTarget, setVoidTarget] = React.useState<MoneyTransfer | null>(null)
 
@@ -91,7 +99,12 @@ export function WithdrawalHistory() {
           rowKey={(t) => t.id}
           entityLabel="transfers"
           isLoading={isPending}
-          pagination={toDataTablePagination(data?.meta)}
+          pagination={{
+            page,
+            totalPages: Math.max(1, Math.ceil(totalCount / PAGE_SIZE)),
+            total: totalCount,
+            limit: PAGE_SIZE,
+          }}
           onPageChange={setPage}
           rowClassName={(t) => (t.voided ? "opacity-40 line-through" : "")}
         />

@@ -10,9 +10,33 @@ export interface TransactionListParams {
   dateTo?: string
   clientId?: number
   sellerId?: number
-  profitStatus?: ProfitStatus
+  /** A single status, or several — the API accepts a comma-separated list. */
+  profitStatus?: ProfitStatus | ProfitStatus[]
   voided?: boolean
   search?: string
+  sortBy?: string
+  sortOrder?: "asc" | "desc"
+}
+
+export interface TransactionStats {
+  total: number
+  finalized: number
+  finalized_percent: number
+  awaiting_settlement: number
+  awaiting_settlement_percent: number
+  partial_settlement: number
+  partial_settlement_percent: number
+  awaiting_rate: number
+  awaiting_rate_percent: number
+  cancelled: number
+  cancelled_percent: number
+}
+
+export async function getTransactionStats(
+  params: Omit<TransactionListParams, "page" | "limit" | "profitStatus" | "voided" | "sortBy" | "sortOrder"> = {}
+): Promise<TransactionStats> {
+  const { data } = await api.get("/transactions/stats", { params })
+  return data
 }
 
 export async function getTransactions(

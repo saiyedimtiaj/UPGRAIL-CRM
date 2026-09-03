@@ -1,18 +1,19 @@
 import type { LucideIcon } from "lucide-react"
 import {
-  LayoutDashboard,
-  Zap,
-  Percent,
-  History,
-  Users,
+  ArrowLeftRight,
   Building2,
   Coins,
-  Wallet,
   FileSpreadsheet,
-  ShieldAlert,
-  Settings,
+  FileText,
+  History,
   Landmark,
-  ArrowLeftRight,
+  LayoutDashboard,
+  Percent,
+  Settings,
+  ShieldAlert,
+  Users,
+  Wallet,
+  Zap,
 } from "lucide-react"
 
 export interface NavItem {
@@ -32,6 +33,11 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
       { href: "/admin/trades", label: "Trades", icon: Zap },
+      {
+        href: "/admin/transactions",
+        label: "Transactions",
+        icon: FileText,
+      },
       { href: "/admin/rates", label: "Rates", icon: Percent },
       { href: "/admin/rate-history", label: "Rate History", icon: History },
     ],
@@ -75,6 +81,10 @@ export const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   "/admin": {
     title: "Dashboard",
     subtitle: "Live Institutional Overview & Spread Performance",
+  },
+  "/admin/transactions": {
+    title: "Transactions",
+    subtitle: "All client transactions and their current status",
   },
   "/admin/trades": {
     title: "Quick Entry & Trades",

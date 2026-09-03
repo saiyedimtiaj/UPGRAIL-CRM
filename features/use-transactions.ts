@@ -55,3 +55,11 @@ export const useDeleteTransaction = () => {
     onSuccess: () => invalidateFinancials(qc),
   })
 }
+
+export const useTransactionStats = (
+  params: Parameters<typeof transactionsApi.getTransactionStats>[0] = {}
+) =>
+  useQuery({
+    queryKey: [QK.transactions, "stats", params],
+    queryFn: () => transactionsApi.getTransactionStats(params),
+  })
