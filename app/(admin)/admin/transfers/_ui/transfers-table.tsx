@@ -9,6 +9,9 @@ import { useMe } from "@/features/use-auth"
 import { getErrorMessage } from "@/lib/handleError"
 import { PAGE_SIZE, toDataTablePagination } from "@/lib/pagination"
 import { SectionCard } from "@/components/primitives/section-card"
+import { FilterBar, type FilterFieldDef } from "@/components/shared/filter-bar"
+import { useUrlFilters } from "@/hooks/use-url-filters"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import DataTable, {
   type DataTableColumn,
 } from "@/components/shared/data-table"
@@ -19,7 +22,7 @@ import { Bdt } from "@/components/primitives/money"
 import { Modal } from "@/components/primitives/modal"
 import { Button } from "@/components/ui/button"
 import { TransferForm } from "@/app/(admin)/admin/transfers/_ui/transfer-form"
-import type { MoneyTransfer } from "@/lib/types"
+import type { MoneyDestination, MoneyTransfer } from "@/lib/types"
 import { ArrowRightLeftIcon, PlusIcon } from "lucide-react"
 
 const DESTINATION_LABEL: Record<string, string> = {
@@ -28,10 +31,84 @@ const DESTINATION_LABEL: Record<string, string> = {
   PROFIT_BANK: "Profit Bank",
 }
 
+const DESTINATION_OPTIONS = [
+  { value: "", label: "Anywhere" },
+  ...Object.entries(DESTINATION_LABEL).map(([value, label]) => ({
+    value,
+    label,
+  })),
+]
+
+const EMPTY_FILTERS = {
+  fromDestination: "",
+  toDestination: "",
+  status: "all",
+  dateFrom: "",
+  dateTo: "",
+  search: "",
+}
+
 export function TransfersTable() {
   const [page, setPage] = React.useState(1)
   const [isTransferModalOpen, setIsTransferModalOpen] = React.useState(false)
-  const { data, isPending } = useTransfers({ page, limit: PAGE_SIZE })
+  const { filters, setFilters, reset, isDirty } = useUrlFilters(EMPTY_FILTERS)
+  const debouncedSearch = useDebouncedValue(filters.search)
+
+  const query = {
+    fromDestination: (filters.fromDestination ||
+      undefined) as MoneyDestination | undefined,
+    toDestination: (filters.toDestination ||
+      undefined) as MoneyDestination | undefined,
+    dateFrom: filters.dateFrom || undefined,
+    dateTo: filters.dateTo || undefined,
+    search: debouncedSearch || undefined,
+    ...(filters.status === "all"
+      ? {}
+      : { voided: filters.status === "voided" }),
+  }
+
+  // Any filter change makes the current page number meaningless.
+  const filterKey = JSON.stringify(query)
+  const [seenKey, setSeenKey] = React.useState(filterKey)
+  if (seenKey !== filterKey) {
+    setSeenKey(filterKey)
+    if (page !== 1) setPage(1)
+  }
+
+  const filterFields: FilterFieldDef[] = [
+    {
+      kind: "search",
+      key: "search",
+      label: "Search",
+      placeholder: "Search by reference, note, or reason…",
+    },
+    {
+      kind: "select",
+      key: "fromDestination",
+      label: "From",
+      options: DESTINATION_OPTIONS,
+    },
+    {
+      kind: "select",
+      key: "toDestination",
+      label: "To",
+      options: DESTINATION_OPTIONS,
+    },
+    {
+      kind: "select",
+      key: "status",
+      label: "Status",
+      options: [
+        { value: "all", label: "All" },
+        { value: "active", label: "Active" },
+        { value: "voided", label: "Voided" },
+      ],
+    },
+    { kind: "date", key: "dateFrom", label: "Date From" },
+    { kind: "date", key: "dateTo", label: "Date To" },
+  ]
+
+  const { data, isPending } = useTransfers({ page, limit: PAGE_SIZE, ...query })
   const { data: me } = useMe()
   const voidTransfer = useVoidTransfer()
   const transfers = data?.data ?? []
@@ -103,6 +180,16 @@ export function TransfersTable() {
 
   return (
     <>
+      <SectionCard className="mb-5">
+        <FilterBar
+          fields={filterFields}
+          value={filters}
+          onChange={setFilters}
+          onReset={reset}
+          isDirty={isDirty}
+        />
+      </SectionCard>
+
       <SectionCard
         title="Transfer History"
         subtitle="Review and record movement between internal destinations."

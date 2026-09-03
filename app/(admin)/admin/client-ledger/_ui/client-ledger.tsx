@@ -30,6 +30,9 @@ import { ConfirmDialog } from "@/components/primitives/confirm-dialog"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { LogPaymentModal } from "@/components/shared/log-payment-modal"
+import { FilterBar, type FilterFieldDef } from "@/components/shared/filter-bar"
+import { useUrlFilters } from "@/hooks/use-url-filters"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { AddClientModal } from "@/components/shared/add-client-modal"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { ClientChargeStatus, Payment } from "@/lib/types"
@@ -38,6 +41,16 @@ const CHARGE_STATUS_TO_UI: Record<ClientChargeStatus, Status> = {
   AWAITING_CLIENT_RATE: "pending",
   POSTED: "finalized",
 }
+
+const EMPTY_FILTERS = {
+  kind: "all",
+  dateFrom: "",
+  dateTo: "",
+  q: "",
+}
+
+/** Entries shown per page of the merged timeline. */
+const TIMELINE_PAGE_SIZE = 25
 
 export function ClientLedger() {
   const { data: clients = [], isPending: clientsPending } = useActiveClients()
@@ -56,6 +69,32 @@ export function ClientLedger() {
   const clientBalances = balances?.clientDues ?? {}
 
   const [search, setSearch] = React.useState("")
+  const { filters, setFilters, reset, isDirty } = useUrlFilters(EMPTY_FILTERS)
+  const debouncedQuery = useDebouncedValue(filters.q)
+  const [timelinePage, setTimelinePage] = React.useState(1)
+
+
+  const timelineFilterFields: FilterFieldDef[] = [
+    {
+      kind: "search",
+      key: "q",
+      label: "Search entries",
+      placeholder: "Search by title or method…",
+      span: 2,
+    },
+    {
+      kind: "select",
+      key: "kind",
+      label: "Entry Type",
+      options: [
+        { value: "all", label: "All entries" },
+        { value: "trade", label: "Trades only" },
+        { value: "payment", label: "Payments only" },
+      ],
+    },
+    { kind: "date", key: "dateFrom", label: "From" },
+    { kind: "date", key: "dateTo", label: "To" },
+  ]
   const [selectedId, setSelectedId] = React.useState<number | null>(
     clients[0]?.id ?? null
   )
@@ -66,6 +105,14 @@ export function ClientLedger() {
   const [deletePaymentTarget, setDeletePaymentTarget] =
     React.useState<Payment | null>(null)
 
+  // A changed filter or a different client invalidates the page number.
+  const timelineKey = `${selectedId}:${JSON.stringify({ ...filters, q: debouncedQuery })}`
+  const [seenTimelineKey, setSeenTimelineKey] = React.useState(timelineKey)
+  if (seenTimelineKey !== timelineKey) {
+    setSeenTimelineKey(timelineKey)
+    if (timelinePage !== 1) setTimelinePage(1)
+  }
+
   const canManage = me?.role.name === "OWNER" || me?.role.name === "PARTNER"
 
   const sortedClients = [...clients]
@@ -75,7 +122,30 @@ export function ClientLedger() {
   const selected =
     clients.find((c) => c.id === selectedId) ?? (clients[0] ?? null)
 
-  const timeline = selected
+  const entryMatchesFilters = (entry: {
+    date: string
+    kind: string
+    title: string
+    subtitle: string
+  }) => {
+    if (filters.kind !== "all" && entry.kind !== filters.kind) return false
+    // Entry dates are ISO timestamps; comparing the date half keeps the
+    // boundary days inclusive.
+    const day = entry.date.slice(0, 10)
+    if (filters.dateFrom && day < filters.dateFrom) return false
+    if (filters.dateTo && day > filters.dateTo) return false
+    if (debouncedQuery) {
+      const needle = debouncedQuery.toLowerCase()
+      if (
+        !entry.title.toLowerCase().includes(needle) &&
+        !entry.subtitle.toLowerCase().includes(needle)
+      )
+        return false
+    }
+    return true
+  }
+
+  const allEntries = selected
     ? [
         ...transactions
           .filter((t) => t.client_id === selected.id && !t.voided)
@@ -106,8 +176,20 @@ export function ClientLedger() {
             status: undefined,
             payment: p,
           })),
-      ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      ]
+        .filter(entryMatchesFilters)
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     : []
+
+  // The timeline merges two sources, so it is paginated here rather than by
+  // the server — which cannot know the interleaved order.
+  const totalEntries = allEntries.length
+  const totalPages = Math.max(1, Math.ceil(totalEntries / TIMELINE_PAGE_SIZE))
+  const currentPage = Math.min(timelinePage, totalPages)
+  const timeline = allEntries.slice(
+    (currentPage - 1) * TIMELINE_PAGE_SIZE,
+    currentPage * TIMELINE_PAGE_SIZE
+  )
 
   return (
     <>
@@ -216,6 +298,16 @@ export function ClientLedger() {
                 </div>
               </div>
 
+              <div className="mb-4 border-b border-slate-100 pb-4">
+                <FilterBar
+                  fields={timelineFilterFields}
+                  value={filters}
+                  onChange={setFilters}
+                  onReset={reset}
+                  isDirty={isDirty}
+                />
+              </div>
+
               <motion.div
                 variants={staggerParent}
                 initial="hidden"
@@ -270,16 +362,48 @@ export function ClientLedger() {
                 )}
               </motion.div>
 
-              {timeline.length >= pageSize - 1 && (
-                <div className="border-t border-slate-100 pt-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => setPageSize((n) => n + 100)}
-                  >
-                    Load more
-                  </Button>
+              {totalEntries > 0 && (
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
+                  <span className="text-[11px] font-semibold text-slate-500">
+                    Showing{" "}
+                    {(currentPage - 1) * TIMELINE_PAGE_SIZE + 1}–
+                    {Math.min(currentPage * TIMELINE_PAGE_SIZE, totalEntries)} of{" "}
+                    {totalEntries}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={currentPage <= 1}
+                      onClick={() => setTimelinePage((n) => Math.max(1, n - 1))}
+                    >
+                      Previous
+                    </Button>
+                    <span className="text-[11px] font-semibold text-slate-500">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={currentPage >= totalPages}
+                      onClick={() => setTimelinePage((n) => n + 1)}
+                    >
+                      Next
+                    </Button>
+                    {/* The merge happens in the browser, so a deep page needs
+                        more source rows pulled in. */}
+                    {currentPage >= totalPages &&
+                      (transactions.length >= pageSize ||
+                        payments.length >= pageSize) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPageSize((n) => n + 100)}
+                        >
+                          Load older
+                        </Button>
+                      )}
+                  </div>
                 </div>
               )}
             </SectionCard>

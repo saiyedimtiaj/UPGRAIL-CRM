@@ -31,6 +31,9 @@ import { Usdt } from "@/components/primitives/money"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { LogPaymentModal } from "@/components/shared/log-payment-modal"
+import { FilterBar, type FilterFieldDef } from "@/components/shared/filter-bar"
+import { useUrlFilters } from "@/hooks/use-url-filters"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { LogSettlementModal } from "@/app/(admin)/admin/seller-ledger/_ui/log-settlement-modal"
 import { AddSellerModal } from "@/components/shared/add-seller-modal"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -38,6 +41,16 @@ import type { Payment, Seller, USDTSettlement } from "@/lib/types"
 
 type SellerFilter = "all" | "conduit" | "external"
 
+
+const EMPTY_FILTERS = {
+  kind: "all",
+  dateFrom: "",
+  dateTo: "",
+  q: "",
+}
+
+/** Entries shown per page of the merged timeline. */
+const TIMELINE_PAGE_SIZE = 25
 
 export function SellerLedger() {
   const { data: sellers = [], isPending: sellersPending } = useActiveSellers()
@@ -88,17 +101,79 @@ export function SellerLedger() {
     sellers.find((s) => s.id === selectedId) ?? (sellers[0] ?? null)
   const isConduit = !!selected?.isSettlementConduit
 
+  const { filters, setFilters, reset, isDirty } = useUrlFilters(EMPTY_FILTERS)
+  const debouncedQuery = useDebouncedValue(filters.q)
+  const [timelinePage, setTimelinePage] = React.useState(1)
+
+  // A changed filter or a different seller invalidates the page number.
+  const timelineKey = `${selectedId}:${JSON.stringify({ ...filters, q: debouncedQuery })}`
+  const [seenTimelineKey, setSeenTimelineKey] = React.useState(timelineKey)
+  if (seenTimelineKey !== timelineKey) {
+    setSeenTimelineKey(timelineKey)
+    if (timelinePage !== 1) setTimelinePage(1)
+  }
+
+  const entryMatchesFilters = (entry: {
+    date: string
+    kind: string
+    title: string
+    subtitle: string
+  }) => {
+    if (filters.kind !== "all" && entry.kind !== filters.kind) return false
+    // Entry dates are ISO timestamps; comparing the date half keeps the
+    // boundary days inclusive.
+    const day = entry.date.slice(0, 10)
+    if (filters.dateFrom && day < filters.dateFrom) return false
+    if (filters.dateTo && day > filters.dateTo) return false
+    if (debouncedQuery) {
+      const needle = debouncedQuery.toLowerCase()
+      if (
+        !entry.title.toLowerCase().includes(needle) &&
+        !entry.subtitle.toLowerCase().includes(needle)
+      )
+        return false
+    }
+    return true
+  }
+
+  // A conduit's ledger shows trades and BDT payments; an external seller's
+  // shows trades and USDT settlements. Offer only what that seller can have.
+  const timelineFilterFields: FilterFieldDef[] = [
+    {
+      kind: "search",
+      key: "q",
+      label: "Search entries",
+      placeholder: "Search by title, note, or method…",
+      span: 2,
+    },
+    {
+      kind: "select",
+      key: "kind",
+      label: "Entry Type",
+      options: [
+        { value: "all", label: "All entries" },
+        { value: "trade", label: "Trades only" },
+        ...(isConduit
+          ? [{ value: "payment", label: "Payments only" }]
+          : [{ value: "settlement", label: "Settlements only" }]),
+      ],
+    },
+    { kind: "date", key: "dateFrom", label: "From" },
+    { kind: "date", key: "dateTo", label: "To" },
+  ]
+
   const usdtBalance =
     selected && !isConduit ? (sellerUsdtDues[selected.id] ?? 0) : 0
   const bdtBalance = selected && isConduit ? nazmulDue : 0
 
-  const timeline = selected
+  const allEntries = selected
     ? !isConduit
       ? [
           ...transactions
             .filter((t) => t.seller_id === selected.id && !t.voided)
             .map((t) => ({
               id: `t-${t.id}`,
+              kind: "trade" as const,
               date: t.created_at,
               title: `Trade ${t.id} USDT Entitlement`,
               subtitle: `$${t.usd_amount.toLocaleString()} @ ${t.card_rate}%`,
@@ -111,6 +186,7 @@ export function SellerLedger() {
             .filter((s) => s.seller_id === selected.id && !s.voided)
             .map((s) => ({
               id: `s-${s.id}`,
+              kind: "settlement" as const,
               date: s.created_at,
               title: "USDT Settlement Sent",
               subtitle: s.note ?? "TRC20 transfer",
@@ -119,9 +195,11 @@ export function SellerLedger() {
               settlement: s as USDTSettlement | undefined,
               payment: undefined as Payment | undefined,
             })),
-        ].sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-        )
+        ]
+          .filter(entryMatchesFilters)
+          .sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          )
       : [
           ...transactions
             .filter(
@@ -132,6 +210,7 @@ export function SellerLedger() {
             )
             .map((t) => ({
               id: `t-${t.id}`,
+              kind: "trade" as const,
               date: t.created_at,
               title: `USD Supplied ${t.id}`,
               subtitle: `$${t.usd_amount.toLocaleString()}`,
@@ -147,6 +226,7 @@ export function SellerLedger() {
             )
             .map((p) => ({
               id: `p-${p.id}`,
+              kind: "payment" as const,
               date: p.created_at,
               title:
                 p.direction === "OUT" ? "Payment Made" : "Payment Reversed",
@@ -158,10 +238,22 @@ export function SellerLedger() {
               settlement: undefined as USDTSettlement | undefined,
               payment: p as Payment | undefined,
             })),
-        ].sort(
-          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
-        )
+        ]
+          .filter(entryMatchesFilters)
+          .sort(
+            (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          )
     : []
+
+  // Two or three sources are merged here, so pagination happens in the
+  // browser — the server cannot know the interleaved order.
+  const totalEntries = allEntries.length
+  const totalPages = Math.max(1, Math.ceil(totalEntries / TIMELINE_PAGE_SIZE))
+  const currentPage = Math.min(timelinePage, totalPages)
+  const timeline = allEntries.slice(
+    (currentPage - 1) * TIMELINE_PAGE_SIZE,
+    currentPage * TIMELINE_PAGE_SIZE
+  )
 
   return (
     <>
@@ -301,6 +393,16 @@ export function SellerLedger() {
                 </Button>
               </div>
 
+              <div className="mb-4 border-b border-slate-100 pb-4">
+                <FilterBar
+                  fields={timelineFilterFields}
+                  value={filters}
+                  onChange={setFilters}
+                  onReset={reset}
+                  isDirty={isDirty}
+                />
+              </div>
+
               <motion.div
                 variants={staggerParent}
                 initial="hidden"
@@ -360,16 +462,48 @@ export function SellerLedger() {
                 )}
               </motion.div>
 
-              {timeline.length >= pageSize - 1 && (
-                <div className="border-t border-slate-100 pt-3">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full"
-                    onClick={() => setPageSize((n) => n + 100)}
-                  >
-                    Load more
-                  </Button>
+              {totalEntries > 0 && (
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-3">
+                  <span className="text-[11px] font-semibold text-slate-500">
+                    Showing {(currentPage - 1) * TIMELINE_PAGE_SIZE + 1}–
+                    {Math.min(currentPage * TIMELINE_PAGE_SIZE, totalEntries)} of{" "}
+                    {totalEntries}
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={currentPage <= 1}
+                      onClick={() => setTimelinePage((n) => Math.max(1, n - 1))}
+                    >
+                      Previous
+                    </Button>
+                    <span className="text-[11px] font-semibold text-slate-500">
+                      Page {currentPage} of {totalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={currentPage >= totalPages}
+                      onClick={() => setTimelinePage((n) => n + 1)}
+                    >
+                      Next
+                    </Button>
+                    {/* The merge happens in the browser, so a deep page needs
+                        more source rows pulled in. */}
+                    {currentPage >= totalPages &&
+                      (transactions.length >= pageSize ||
+                        settlements.length >= pageSize ||
+                        payments.length >= pageSize) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPageSize((n) => n + 100)}
+                        >
+                          Load older
+                        </Button>
+                      )}
+                  </div>
                 </div>
               )}
             </SectionCard>

@@ -49,6 +49,12 @@ export function LogSettlementModal({
   const previewBdt =
     previewRate && usdtAmount ? Number(usdtAmount) * previewRate : undefined
 
+  // Which button was pressed, read inside the single submit handler. A ref
+  // rather than state because it must be readable in the same tick.
+  const keepOpenRef = React.useRef(false)
+  const amountRef = React.useRef<HTMLInputElement>(null)
+  const [savedCount, setSavedCount] = React.useState(0)
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     const num = Number(usdtAmount)
@@ -66,15 +72,30 @@ export function LogSettlementModal({
         note: note || undefined,
       })
       fireConfetti()
+
+      const total = savedCount + 1
+      setSavedCount(total)
       toast.success(
-        `${num.toLocaleString()} USDT settlement logged for ${sellerName}.`
+        `${num.toLocaleString()} USDT settlement logged for ${sellerName}.` +
+          (keepOpenRef.current && total > 1
+            ? ` ${total} saved this session.`
+            : "")
       )
 
+      // The date stays put so a run of settlements on the same day needs no
+      // re-picking; only the per-entry fields clear.
       setUsdtAmount("")
       setNote("")
-      onOpenChange(false)
+
+      if (keepOpenRef.current) {
+        amountRef.current?.focus()
+      } else {
+        onOpenChange(false)
+      }
     } catch (error) {
       toast.error(getErrorMessage(error, "Failed to log settlement."))
+    } finally {
+      keepOpenRef.current = false
     }
   }
 
@@ -113,6 +134,7 @@ export function LogSettlementModal({
           <div className="space-y-1.5">
             <Label htmlFor="settlement-amount">USDT Amount</Label>
             <Input
+              ref={amountRef}
               id="settlement-amount"
               type="number"
               min="0"
@@ -152,15 +174,35 @@ export function LogSettlementModal({
           </div>
         )}
 
-        <SubmitButton
-          type="submit"
-          className="w-full"
-          disabled={!conduitSeller}
-          isSubmitting={createSettlement.isPending}
-          pendingLabel="Logging settlement…"
-        >
-          Log Settlement
-        </SubmitButton>
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {/* Settlements are usually logged in a run, so the modal can stay
+              open between them rather than being reopened each time. */}
+          <SubmitButton
+            type="submit"
+            variant="outline"
+            className="w-full"
+            disabled={!conduitSeller}
+            isSubmitting={createSettlement.isPending}
+            pendingLabel="Logging…"
+            onClick={() => {
+              keepOpenRef.current = true
+            }}
+          >
+            Save &amp; Continue
+          </SubmitButton>
+          <SubmitButton
+            type="submit"
+            className="w-full"
+            disabled={!conduitSeller}
+            isSubmitting={createSettlement.isPending}
+            pendingLabel="Logging…"
+            onClick={() => {
+              keepOpenRef.current = false
+            }}
+          >
+            Save &amp; Close
+          </SubmitButton>
+        </div>
       </form>
     </Modal>
   )

@@ -5,6 +5,11 @@ export interface SettlementListParams {
   page?: number
   limit?: number
   sellerId?: number
+  paidBy?: number
+  dateFrom?: string
+  dateTo?: string
+  voided?: boolean
+  search?: string
 }
 
 export async function getSettlements(

@@ -9,8 +9,10 @@ import { useActiveSellers } from "@/features/use-sellers"
 import { useMe } from "@/features/use-auth"
 import { getErrorMessage } from "@/lib/handleError"
 import { PAGE_SIZE, toDataTablePagination } from "@/lib/pagination"
-import { SearchableSelect } from "@/components/primitives/searchable-select"
 import { SectionCard } from "@/components/primitives/section-card"
+import { FilterBar, type FilterFieldDef } from "@/components/shared/filter-bar"
+import { useUrlFilters } from "@/hooks/use-url-filters"
+import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import DataTable, {
   type DataTableColumn,
 } from "@/components/shared/data-table"
@@ -22,15 +24,85 @@ import type { USDTSettlement } from "@/lib/types"
 import { EditSettlementModal } from "./edit-settlement-modal"
 
 
+const EMPTY_FILTERS = {
+  sellerId: undefined as number | undefined,
+  paidBy: undefined as number | undefined,
+  dateFrom: "",
+  dateTo: "",
+  status: "all",
+  search: "",
+}
+
 export function SettlementsTable() {
   const [page, setPage] = React.useState(1)
-  const [sellerFilter, setSellerFilter] = React.useState<number | undefined>()
   const { data: sellers = [] } = useActiveSellers()
+  const { filters, setFilters, reset, isDirty } = useUrlFilters(EMPTY_FILTERS)
+  const debouncedSearch = useDebouncedValue(filters.search)
+
+  const query = {
+    sellerId: filters.sellerId,
+    paidBy: filters.paidBy,
+    dateFrom: filters.dateFrom || undefined,
+    dateTo: filters.dateTo || undefined,
+    search: debouncedSearch || undefined,
+    ...(filters.status === "all"
+      ? {}
+      : { voided: filters.status === "voided" }),
+  }
+
+  // Any filter change makes the current page number meaningless.
+  const filterKey = JSON.stringify(query)
+  const [seenKey, setSeenKey] = React.useState(filterKey)
+  if (seenKey !== filterKey) {
+    setSeenKey(filterKey)
+    if (page !== 1) setPage(1)
+  }
+
   const { data, isPending } = useSettlements({
     page,
     limit: PAGE_SIZE,
-    sellerId: sellerFilter,
+    ...query,
   })
+
+  const sellerOptions = [
+    { value: 0, label: "All Sellers" },
+    ...sellers.map((s) => ({ value: s.id, label: s.name })),
+  ]
+
+  const filterFields: FilterFieldDef[] = [
+    {
+      kind: "search",
+      key: "search",
+      label: "Search",
+      placeholder: "Search by payer, seller, or note…",
+    },
+    {
+      kind: "searchable",
+      key: "sellerId",
+      label: "Seller Settled",
+      options: sellerOptions,
+      placeholder: "All Sellers",
+    },
+    {
+      kind: "searchable",
+      key: "paidBy",
+      label: "Paid By",
+      options: sellerOptions,
+      placeholder: "Anyone",
+    },
+    {
+      kind: "select",
+      key: "status",
+      label: "Status",
+      options: [
+        { value: "all", label: "All" },
+        { value: "active", label: "Active" },
+        { value: "voided", label: "Voided" },
+      ],
+    },
+    { kind: "date", key: "dateFrom", label: "Date From" },
+    { kind: "date", key: "dateTo", label: "Date To" },
+  ]
   const { data: me } = useMe()
   const voidSettlement = useVoidSettlement()
   const settlements = data?.data ?? []
@@ -121,24 +193,17 @@ export function SettlementsTable() {
 
   return (
     <>
-      <SectionCard
-        title="Historical USDT Settlement Logs"
-        action={
-          <SearchableSelect
-            value={sellerFilter ?? 0}
-            onChange={(v) => {
-              setSellerFilter(v || undefined)
-              setPage(1)
-            }}
-            options={[
-              { value: 0, label: "All Sellers" },
-              ...sellers.map((s) => ({ value: s.id, label: s.name })),
-            ]}
-            searchPlaceholder="Search sellers..."
-            className="w-56"
-          />
-        }
-      >
+      <SectionCard className="mb-5">
+        <FilterBar
+          fields={filterFields}
+          value={filters}
+          onChange={setFilters}
+          onReset={reset}
+          isDirty={isDirty}
+        />
+      </SectionCard>
+
+      <SectionCard title="Historical USDT Settlement Logs">
         <DataTable
           columns={columns}
           data={settlements}

@@ -134,14 +134,21 @@ export function ClientDetail({ id }: { id: number }) {
             </motion.div>
           )}
 
-          <motion.div variants={staggerChild} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <motion.div
+            variants={staggerChild}
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+          >
             <StatCard
-              tone="dark"
+              accent="amber"
               icon={Wallet}
               label="Outstanding Due"
               value={balances?.clientDues[client.id] ?? 0}
               format={(n) => bdt(n)}
-              footer={<span className="text-[11px] font-semibold text-zinc-400">Live receivable balance</span>}
+              footer={
+                <span className="text-[11px] font-semibold text-slate-500">
+                  Live receivable balance
+                </span>
+              }
             />
             <StatCard
               tone="light"
@@ -170,14 +177,16 @@ export function ClientDetail({ id }: { id: number }) {
               }
             />
             <StatCard
-              tone="mint"
+              accent="teal"
               icon={ArrowDownLeft}
               label="Lifetime Paid"
               value={lifetimePaid}
               format={(n) => bdt(n)}
               footer={
-                <span className="text-[11px] font-semibold text-emerald-800/70">
-                  {lastPayment ? `Last: ${shortDate(lastPayment.date)}` : "No payments yet"}
+                <span className="text-[11px] font-semibold text-slate-500">
+                  {lastPayment
+                    ? `Last: ${shortDate(lastPayment.date)}`
+                    : "No payments yet"}
                 </span>
               }
             />

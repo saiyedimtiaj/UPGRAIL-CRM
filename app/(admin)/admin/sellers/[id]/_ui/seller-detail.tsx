@@ -81,6 +81,10 @@ export function SellerDetail({ id }: { id: number }) {
   const nonVoidedSettlements = (totalsSettlements?.data ?? []).filter((s) => !s.voided)
   const totalUsdtSettled = nonVoidedSettlements.reduce((sum, s) => sum + s.usdt_amount, 0)
   const totalBdtSettled = nonVoidedSettlements.reduce((sum, s) => sum + s.bdt_equivalent, 0)
+  // USDT this seller took over from others — part of their due, but sourced
+  // elsewhere, so it is worth showing separately.
+  const obligationsHeld =
+    validId === null ? 0 : (balances?.sellerObligationsHeld?.[validId] ?? 0)
   const totalsTruncated =
     (totalsTx?.meta.totalCount ?? 0) > TOTALS_LIMIT || (totalsSettlements?.meta.totalCount ?? 0) > TOTALS_LIMIT
 
@@ -156,33 +160,39 @@ export function SellerDetail({ id }: { id: number }) {
             </motion.div>
           )}
 
-          <motion.div variants={staggerChild} className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <motion.div
+            variants={staggerChild}
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
+          >
             {seller.isSettlementConduit ? (
               <StatCard
-                tone="dark"
+                accent="sky"
                 icon={Landmark}
                 label="Nazmul Due (BDT)"
                 value={balances?.nazmulDue ?? 0}
                 format={(n) => bdt(n)}
                 footer={
-                  <span className="text-[11px] font-semibold text-zinc-400">
+                  <span className="text-[11px] font-semibold text-slate-500">
                     Conduit obligations settle in BDT, not USDT.
                   </span>
                 }
               />
             ) : (
               <StatCard
-                tone="dark"
+                accent="violet"
                 icon={Coins}
                 label="USDT Owed"
                 value={balances?.sellerUsdtDues[seller.id] ?? 0}
                 format={(n) => usdt(n)}
-                footer={<span className="text-[11px] font-semibold text-zinc-400">Live unsettled balance</span>}
+                footer={
+                  <span className="text-[11px] font-semibold text-slate-500">
+                    Live unsettled balance
+                  </span>
+                }
               />
             )}
             <StatCard
-              tone="light"
-              accent="sky"
+              accent="amber"
               icon={Zap}
               label="USD Supplied"
               value={totalUsdSupplied}
@@ -195,14 +205,28 @@ export function SellerDetail({ id }: { id: number }) {
               }
             />
             <StatCard
-              tone="mint"
+              accent="emerald"
               icon={ArrowUpRight}
               label="USDT Settled"
               value={totalUsdtSettled}
               format={(n) => usdt(n)}
               footer={
-                <span className="text-[11px] font-semibold text-emerald-800/70">
+                <span className="text-[11px] font-semibold text-slate-500">
                   ≈ {bdt(totalBdtSettled)} at settlement rates
+                </span>
+              }
+            />
+            <StatCard
+              accent="teal"
+              icon={Coins}
+              label="Obligations Held"
+              value={obligationsHeld}
+              format={(n) => usdt(n)}
+              footer={
+                <span className="text-[11px] font-semibold text-slate-500">
+                  {obligationsHeld > 0
+                    ? "Taken over from other sellers"
+                    : "None taken over from others"}
                 </span>
               }
             />

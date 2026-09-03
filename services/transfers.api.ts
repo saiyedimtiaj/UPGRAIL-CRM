@@ -4,6 +4,13 @@ import type { MoneyDestination, MoneyTransfer, PaginatedResponse, TransferPrevie
 export interface TransferListParams {
   page?: number
   limit?: number
+  fromDestination?: MoneyDestination
+  toDestination?: MoneyDestination
+  voided?: boolean
+  /** YYYY-MM-DD; matched against createdAt, which is what transfers carry. */
+  dateFrom?: string
+  dateTo?: string
+  search?: string
 }
 
 export async function getTransfers(

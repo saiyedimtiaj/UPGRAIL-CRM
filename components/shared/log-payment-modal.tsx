@@ -45,7 +45,7 @@ function PaymentForm({
   mode: "create" | "edit"
   initial?: Payment
   todayISO: string
-  onDone: () => void
+  onDone: (opts: { keepOpen: boolean }) => void
 }) {
   const { data: clients = [] } = useActiveClients()
   const { data: sellers = [] } = useActiveSellers()
@@ -99,6 +99,13 @@ function PaymentForm({
 
   const isSubmitting = createPayment.isPending || updatePayment.isPending
 
+  // Which button was pressed, read inside the single submit handler. A ref
+  // rather than state because it must be readable in the same tick, before
+  // any re-render.
+  const keepOpenRef = React.useRef(false)
+  const amountRef = React.useRef<HTMLInputElement>(null)
+  const [savedCount, setSavedCount] = React.useState(0)
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (isSubmitting) return
@@ -127,12 +134,31 @@ function PaymentForm({
           note: note || undefined,
         })
         fireConfetti()
-        toast.success(`Payment of ৳${num.toLocaleString()} logged for ${partyName}.`)
+
+        const total = savedCount + 1
+        setSavedCount(total)
+        toast.success(
+          `Payment of ৳${num.toLocaleString()} logged for ${partyName}.` +
+            (keepOpenRef.current && total > 1
+              ? ` ${total} saved this session.`
+              : "")
+        )
       }
 
-      onDone()
+      if (keepOpenRef.current) {
+        // Keep the date and the party so consecutive entries for the same
+        // client on the same day need no re-picking; clear only what differs
+        // per payment and put the cursor back where typing resumes.
+        setAmount("")
+        setNote("")
+        amountRef.current?.focus()
+      }
+
+      onDone({ keepOpen: keepOpenRef.current })
     } catch (error) {
       toast.error(getErrorMessage(error, "Failed to save payment."))
+    } finally {
+      keepOpenRef.current = false
     }
   }
 
@@ -185,6 +211,7 @@ function PaymentForm({
       <div className="space-y-1.5">
         <Label htmlFor="payment-amount">Amount (BDT)</Label>
         <Input
+          ref={amountRef}
           id="payment-amount"
           type="number"
           min="0"
@@ -249,14 +276,44 @@ function PaymentForm({
           placeholder="Optional"
         />
       </div>
-      <SubmitButton
-        type="submit"
-        className="w-full"
-        isSubmitting={isSubmitting}
-        pendingLabel="Saving…"
-      >
-        {isEdit ? "Save Changes" : "Log Payment"}
-      </SubmitButton>
+      {isEdit ? (
+        <SubmitButton
+          type="submit"
+          className="w-full"
+          isSubmitting={isSubmitting}
+          pendingLabel="Saving…"
+        >
+          Save Changes
+        </SubmitButton>
+      ) : (
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+          {/* Logging a run of payments is the common case, so the modal can
+              stay open between them rather than being reopened each time. */}
+          <SubmitButton
+            type="submit"
+            variant="outline"
+            className="w-full"
+            isSubmitting={isSubmitting}
+            pendingLabel="Saving…"
+            onClick={() => {
+              keepOpenRef.current = true
+            }}
+          >
+            Save &amp; Continue
+          </SubmitButton>
+          <SubmitButton
+            type="submit"
+            className="w-full"
+            isSubmitting={isSubmitting}
+            pendingLabel="Saving…"
+            onClick={() => {
+              keepOpenRef.current = false
+            }}
+          >
+            Save &amp; Close
+          </SubmitButton>
+        </div>
+      )}
     </form>
   )
 }
@@ -295,7 +352,9 @@ export function LogPaymentModal({
         mode={mode}
         initial={initial}
         todayISO={todayISO()}
-        onDone={() => onOpenChange(false)}
+        onDone={({ keepOpen }) => {
+          if (!keepOpen) onOpenChange(false)
+        }}
       />
     </Modal>
   )
