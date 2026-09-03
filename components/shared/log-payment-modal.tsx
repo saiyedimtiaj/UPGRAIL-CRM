@@ -76,7 +76,8 @@ function PaymentForm({
   const [rawMethod, setRawMethod] = React.useState<string>(initial?.method ?? "")
   const [note, setNote] = React.useState(initial?.note ?? "")
   const [destination, setDestination] = React.useState<MoneyDestination>(
-    initial?.destination ?? "UPGRAIL_BANK"
+    // Most client money is handed straight to the conduit, so default there.
+    initial?.destination ?? "NAZMUL"
   )
 
 

@@ -41,8 +41,12 @@ const CHARGE_STATUS_TO_UI: Record<ClientChargeStatus, Status> = {
 
 export function ClientLedger() {
   const { data: clients = [], isPending: clientsPending } = useActiveClients()
-  const { data: txData } = useTransactions({ limit: 500 })
-  const { data: paymentsData } = usePayments({ limit: 500 })
+  // Ledgers used to pull a fixed 500 rows and filter in the browser, which
+  // simply stopped being correct past 500. Load in pages instead and let the
+  // operator ask for more.
+  const [pageSize, setPageSize] = React.useState(100)
+  const { data: txData } = useTransactions({ limit: pageSize })
+  const { data: paymentsData } = usePayments({ limit: pageSize })
   const { data: balances } = useBalances()
   const { data: me } = useMe()
   const deletePayment = useDeletePayment()
@@ -265,6 +269,19 @@ export function ClientLedger() {
                   ))
                 )}
               </motion.div>
+
+              {timeline.length >= pageSize - 1 && (
+                <div className="border-t border-slate-100 pt-3">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full"
+                    onClick={() => setPageSize((n) => n + 100)}
+                  >
+                    Load more
+                  </Button>
+                </div>
+              )}
             </SectionCard>
           ) : (
             <EmptyState
