@@ -28,6 +28,7 @@ import { shortDate } from "@/lib/date"
 import { bdt, usd, usdt } from "@/lib/format"
 import { PageHeader } from "@/components/primitives/page-header"
 import { StatCard } from "@/components/primitives/stat-card"
+import { TransactionsTable } from "@/components/shared/transactions-table"
 import { SectionCard } from "@/components/primitives/section-card"
 import { DetailField } from "@/components/primitives/detail-field"
 import { ActivePill } from "@/components/primitives/active-pill"
@@ -38,7 +39,6 @@ import { ConfirmDialog } from "@/components/primitives/confirm-dialog"
 import { AddSellerModal } from "@/components/shared/add-seller-modal"
 import { LogPaymentModal } from "@/components/shared/log-payment-modal"
 import { Button } from "@/components/ui/button"
-import { SellerTradesCard } from "./seller-trades-card"
 import { SellerSettlementsCard } from "./seller-settlements-card"
 
 const TOTALS_LIMIT = 500
@@ -230,7 +230,16 @@ export function SellerDetail({ id }: { id: number }) {
           </motion.div>
 
           <motion.div variants={staggerChild}>
-            <SellerTradesCard sellerId={seller.id} />
+            <SectionCard
+              title="Transactions"
+              subtitle="Every trade sourced through this seller"
+            >
+              <TransactionsTable
+                filters={{ sellerId: seller.id }}
+                hide={["seller"]}
+                emptyLabel="transactions"
+              />
+            </SectionCard>
           </motion.div>
 
           <motion.div variants={staggerChild}>

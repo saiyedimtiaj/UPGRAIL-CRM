@@ -18,6 +18,7 @@ import { shortDate } from "@/lib/date"
 import { bdt, usd } from "@/lib/format"
 import { PageHeader } from "@/components/primitives/page-header"
 import { StatCard } from "@/components/primitives/stat-card"
+import { TransactionsTable } from "@/components/shared/transactions-table"
 import { SectionCard } from "@/components/primitives/section-card"
 import { DetailField } from "@/components/primitives/detail-field"
 import { ActivePill } from "@/components/primitives/active-pill"
@@ -27,7 +28,6 @@ import { ConfirmDialog } from "@/components/primitives/confirm-dialog"
 import { AddClientModal } from "@/components/shared/add-client-modal"
 import { LogPaymentModal } from "@/components/shared/log-payment-modal"
 import { Button } from "@/components/ui/button"
-import { ClientTradesCard } from "./client-trades-card"
 import { ClientPaymentsCard } from "./client-payments-card"
 
 const TOTALS_LIMIT = 500
@@ -64,6 +64,8 @@ export function ClientDetail({ id }: { id: number }) {
   const nonVoidedTrades = (totalsTx?.data ?? []).filter((t) => !t.voided)
   const totalUsdVolume = nonVoidedTrades.reduce((sum, t) => sum + t.usd_amount, 0)
   const totalClientCharge = nonVoidedTrades.reduce((sum, t) => sum + (t.sell_bdt ?? 0), 0)
+  // Only finalized trades carry a profit figure; the rest are still pending.
+  const totalProfit = nonVoidedTrades.reduce((sum, t) => sum + (t.profit ?? 0), 0)
   const nonVoidedPayments = (totalsPay?.data ?? []).filter((p) => !p.voided)
   const lifetimePaid = nonVoidedPayments.reduce(
     (sum, p) => sum + (p.direction === "IN" ? p.amount : -p.amount),
@@ -155,6 +157,17 @@ export function ClientDetail({ id }: { id: number }) {
               }
             />
             <StatCard
+              icon={TrendingUp}
+              label="Total Profit"
+              value={totalProfit}
+              format={(n) => bdt(n)}
+              footer={
+                <span className="text-[11px] font-semibold text-slate-500">
+                  From finalized trades only
+                </span>
+              }
+            />
+            <StatCard
               tone="mint"
               icon={ArrowDownLeft}
               label="Lifetime Paid"
@@ -183,7 +196,16 @@ export function ClientDetail({ id }: { id: number }) {
           </motion.div>
 
           <motion.div variants={staggerChild}>
-            <ClientTradesCard clientId={client.id} />
+            <SectionCard
+              title="Transactions"
+              subtitle="Every trade booked against this client"
+            >
+              <TransactionsTable
+                filters={{ clientId: client.id }}
+                hide={["client"]}
+                emptyLabel="transactions"
+              />
+            </SectionCard>
           </motion.div>
 
           <motion.div variants={staggerChild}>

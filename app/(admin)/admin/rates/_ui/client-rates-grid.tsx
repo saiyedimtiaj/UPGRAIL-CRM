@@ -5,10 +5,16 @@ import { toast } from "sonner"
 import { AlertTriangle } from "lucide-react"
 
 import { findRateValue } from "@/lib/calc/rates"
-import { useRates, useUpsertRate, useRateImpactPreview } from "@/features/use-rates"
+import {
+  useBulkUpsertRates,
+  useRateImpactPreview,
+  useRates,
+  useUpsertRate,
+} from "@/features/use-rates"
 import { useActiveClients } from "@/features/use-clients"
 import { getErrorMessage } from "@/lib/handleError"
 import { useConfetti } from "@/hooks/use-confetti"
+import { SubmitButton } from "@/components/primitives/submit-button"
 import { SectionCard } from "@/components/primitives/section-card"
 import { RateInputRow } from "@/components/primitives/rate-input-row"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -88,8 +94,49 @@ function ClientRateRow({
 export function ClientRatesGrid({ date }: { date: string }) {
   const { data: rates = [], isPending: ratesPending } = useRates({ date })
   const { data: clients = [], isPending: clientsPending } = useActiveClients()
+  const bulkUpsert = useBulkUpsertRates()
+  const fireConfetti = useConfetti()
 
   const [drafts, setDrafts] = React.useState<Record<number, string>>({})
+
+  // Only rows the user actually changed are sent; an unchanged grid saves
+  // nothing rather than rewriting every rate to its current value.
+  const dirtyRows = Object.entries(drafts)
+    .map(([id, raw]) => ({ clientId: Number(id), value: Number(raw) }))
+    .filter(
+      (r) => r.value > 0 && r.value !== savedForId(r.clientId)
+    )
+
+  function savedForId(clientId: number): number | undefined {
+    return findRateValue(rates, {
+      date,
+      party_type: "CLIENT",
+      party_id: clientId,
+      kind: "DIRECT",
+    })
+  }
+
+  async function saveAll() {
+    if (dirtyRows.length === 0) return
+    try {
+      const result = await bulkUpsert.mutateAsync({
+        date,
+        rates: dirtyRows.map((r) => ({
+          partyType: "CLIENT" as const,
+          partyId: r.clientId,
+          kind: "DIRECT" as const,
+          value: r.value,
+        })),
+      })
+      fireConfetti()
+      toast.success(
+        `${result.savedCount} rate(s) saved — ${result.changedCount} trade(s) re-checked.`
+      )
+      setDrafts({})
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Failed to save rates."))
+    }
+  }
 
   function savedFor(clientId: number): number | undefined {
     return findRateValue(rates, {
@@ -104,6 +151,18 @@ export function ClientRatesGrid({ date }: { date: string }) {
     <SectionCard
       title="Agency & Brand Direct Selling Rates (BDT/USD)"
       subtitle="What each client pays the business per USD sourced"
+      action={
+        <SubmitButton
+          size="sm"
+          disabled={dirtyRows.length === 0}
+          isSubmitting={bulkUpsert.isPending}
+          pendingLabel="Saving all…"
+          onClick={saveAll}
+        >
+          Save All Rates
+          {dirtyRows.length > 0 ? ` (${dirtyRows.length})` : ""}
+        </SubmitButton>
+      }
     >
       <div className="grid grid-cols-1 gap-x-8 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
         {ratesPending || clientsPending

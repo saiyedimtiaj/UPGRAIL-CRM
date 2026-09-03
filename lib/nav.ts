@@ -47,6 +47,11 @@ export const NAV_SECTIONS: NavSection[] = [
     items: [
       { href: "/admin/clients", label: "Clients", icon: Users },
       { href: "/admin/sellers", label: "Sellers", icon: Building2 },
+      {
+        href: "/admin/primary-supplier",
+        label: "Primary Supplier",
+        icon: Landmark,
+      },
     ],
   },
   {
@@ -85,6 +90,10 @@ export const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   "/admin/transactions": {
     title: "Transactions",
     subtitle: "All client transactions and their current status",
+  },
+  "/admin/primary-supplier": {
+    title: "Primary Supplier",
+    subtitle: "Conduit Ledger, Payable & Sourced Trades",
   },
   "/admin/trades": {
     title: "Quick Entry & Trades",

@@ -50,7 +50,10 @@ export function SellersTable() {
   const deleteSeller = useDeleteSeller()
   const setConduit = useSetSettlementConduit()
 
-  const sellers = data?.data ?? []
+  // The settlement conduit is a different kind of counterparty — its balance
+  // is in BDT, not USDT — so it gets its own page rather than sitting in a
+  // list whose columns do not describe it.
+  const sellers = (data?.data ?? []).filter((s) => !s.isSettlementConduit)
   const sellerUsdtDues = balancesData?.sellerUsdtDues ?? {}
   const nazmulDue = balancesData?.nazmulDue ?? 0
 

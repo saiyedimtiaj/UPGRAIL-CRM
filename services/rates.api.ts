@@ -68,3 +68,19 @@ export async function previewRateImpact(params: {
   const { data } = await api.get("/rates/preview-impact", { params })
   return data
 }
+
+export interface BulkRateRow {
+  partyType: "CLIENT" | "SELLER"
+  partyId: number
+  kind: "DIRECT" | "CARD" | "USDT"
+  value: number
+}
+
+export async function bulkUpsertRates(payload: {
+  date: string
+  rates: BulkRateRow[]
+  reason?: string
+}): Promise<{ changedCount: number; savedCount: number }> {
+  const { data } = await api.post("/rates/bulk", payload)
+  return data
+}

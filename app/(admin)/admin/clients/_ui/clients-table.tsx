@@ -7,7 +7,7 @@ import { toast } from "sonner"
 import { Eye, Plus } from "lucide-react"
 
 import { useClients, useDeleteClient } from "@/features/use-clients"
-import { useBalances } from "@/features/use-analytics"
+import { useBalances, useClientsOverdue } from "@/features/use-analytics"
 import { useMe } from "@/features/use-auth"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { getErrorMessage } from "@/lib/handleError"
@@ -21,7 +21,6 @@ import { RowActions } from "@/components/shared/row-actions"
 import { ConfirmDialog } from "@/components/primitives/confirm-dialog"
 import { Button } from "@/components/ui/button"
 import { Bdt } from "@/components/primitives/money"
-import { ActivePill } from "@/components/primitives/active-pill"
 import { AddClientModal } from "@/components/shared/add-client-modal"
 import type { Client } from "@/lib/types"
 import {
@@ -49,6 +48,13 @@ export function ClientsTable() {
 
   const clients = data?.data ?? []
   const clientDues = balancesData?.clientDues ?? {}
+
+  // Keyed by client id so each row can read its own due / overdue / last
+  // transaction without scanning the list.
+  const { data: overdueData } = useClientsOverdue()
+  const overdueByClient = Object.fromEntries(
+    (overdueData?.clients ?? []).map((r) => [r.client_id, r])
+  )
 
   const [addOpen, setAddOpen] = React.useState(false)
   const [editTarget, setEditTarget] = React.useState<Client | null>(null)
@@ -81,27 +87,55 @@ export function ClientsTable() {
       hideBelow: "md",
     },
     {
-      key: "region",
-      header: "Region",
-      cell: (c) => <span className="text-slate-600">{c.region}</span>,
-      hideBelow: "lg",
+      key: "totalDue",
+      header: "Total Due",
+      align: "right",
+      cell: (c) => (
+        <Bdt
+          value={overdueByClient[c.id]?.total_due ?? clientDues[c.id] ?? 0}
+          className="font-semibold"
+        />
+      ),
     },
     {
-      key: "balance",
-      header: "Balance (Receivable)",
-      align: "right",
-      cell: (c) => <Bdt value={clientDues[c.id] ?? 0} className="font-semibold" />,
+      key: "lastTransaction",
+      header: "Last Transaction",
+      cell: (c) => {
+        const at = overdueByClient[c.id]?.last_transaction_at
+        return (
+          <span className="text-slate-600">{at ? shortDate(at) : "—"}</span>
+        )
+      },
+      hideBelow: "md",
     },
     {
       key: "status",
       header: "Status",
-      cell: (c) => <ActivePill active={c.active} />,
-    },
-    {
-      key: "created",
-      header: "Added",
-      cell: (c) => shortDate(c.created_at),
-      hideBelow: "xl",
+      cell: (c) => {
+        const row = overdueByClient[c.id]
+        // Solid red once anything has gone past 48 hours unpaid, solid green
+        // when nothing is outstanding. Anything owed but still inside the
+        // window is neither — it is simply current.
+        if (row && row.overdue > 0) {
+          return (
+            <span className="inline-flex items-center rounded-md bg-rose-600 px-2 py-0.5 text-[10px] font-bold tracking-wide text-white uppercase">
+              Overdue
+            </span>
+          )
+        }
+        if (!row || row.total_due <= 0) {
+          return (
+            <span className="inline-flex items-center rounded-md bg-emerald-600 px-2 py-0.5 text-[10px] font-bold tracking-wide text-white uppercase">
+              Paid
+            </span>
+          )
+        }
+        return (
+          <span className="inline-flex items-center rounded-md bg-amber-100 px-2 py-0.5 text-[10px] font-bold tracking-wide text-amber-800 uppercase">
+            Current
+          </span>
+        )
+      },
     },
     {
       key: "actions",

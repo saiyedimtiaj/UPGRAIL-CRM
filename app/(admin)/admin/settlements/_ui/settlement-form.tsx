@@ -38,6 +38,10 @@ export function SettlementForm() {
   // seller selected — fall back to the first external seller once they load.
   const [sellerId, setSellerId] = React.useState<number | undefined>(undefined)
   const effectiveSellerId = sellerId ?? externalSellers[0]?.id
+  // Any seller may front a settlement; the conduit is only the usual one.
+  const [payerId, setPayerId] = React.useState<number | undefined>(undefined)
+  const effectivePayerId = payerId ?? conduitSeller?.id
+
   const [date, setDate] = React.useState(todayISO())
   const [usdtAmount, setUsdtAmount] = React.useState("")
   const [note, setNote] = React.useState("")
@@ -92,12 +96,6 @@ export function SettlementForm() {
       toast.error("No settlement conduit is configured yet.")
       return
     }
-    if (exceedsOutstanding) {
-      toast.error(
-        `This settlement exceeds what ${selectedSeller?.name ?? "this seller"} is owed. The maximum is ${maxSettleable.toLocaleString()} USDT.`
-      )
-      return
-    }
     if (isOverridden && !allocationSumMatches) {
       toast.error("Allocations must sum exactly to the settled amount.")
       return
@@ -113,6 +111,7 @@ export function SettlementForm() {
       await createSettlement.mutateAsync({
         date,
         sellerId: effectiveSellerId,
+        paidBy: effectivePayerId,
         usdtAmount: num,
         note: note || undefined,
         allocations,
@@ -184,14 +183,19 @@ export function SettlementForm() {
 
         <div className="space-y-1.5">
           <Label htmlFor="settlement-payer">Fronted By</Label>
-          <Input
+          <SearchableSelect
             id="settlement-payer"
-            value={
-              conduitSeller
-                ? `${conduitSeller.name} (Settlement Conduit)`
-                : "Not configured yet"
-            }
-            disabled
+            value={effectivePayerId}
+            onChange={setPayerId}
+            options={sellers.map((s) => ({
+              value: s.id,
+              label: `${s.flag ?? ""} ${s.name}`.trim(),
+              sublabel: s.isSettlementConduit
+                ? "Settlement conduit"
+                : "Fronting on the business's behalf",
+            }))}
+            searchPlaceholder="Search sellers..."
+            placeholder="Select who paid"
           />
         </div>
 
@@ -207,11 +211,11 @@ export function SettlementForm() {
 
         {exceedsOutstanding && selectedSeller ? (
           <Alert
-            variant="error"
-            title="Settlement exceeds outstanding USDT due"
-            message={`${selectedSeller.name} is currently owed ${maxSettleable.toLocaleString()} USDT. This settlement is over by ${(preview?.unallocated_usdt ?? 0).toLocaleString()} USDT, which has no open trade to settle against.`}
+            variant="info"
+            title="This will create an advance"
+            message={`${selectedSeller.name} is owed ${maxSettleable.toLocaleString()} USDT. The extra ${(preview?.unallocated_usdt ?? 0).toLocaleString()} USDT is held as credit and applied to their next trades.`}
             action={{
-              label: `Use maximum (${maxSettleable.toLocaleString()} USDT)`,
+              label: `Settle exactly what is owed (${maxSettleable.toLocaleString()} USDT)`,
               onClick: () => setUsdtAmount(String(maxSettleable)),
             }}
           />
@@ -283,9 +287,7 @@ export function SettlementForm() {
           type="submit"
           className="w-full"
           disabled={
-            !conduitSeller ||
-            exceedsOutstanding ||
-            (isOverridden && !allocationSumMatches)
+            !conduitSeller || (isOverridden && !allocationSumMatches)
           }
           isSubmitting={createSettlement.isPending}
           pendingLabel="Logging settlement…"

@@ -49,3 +49,14 @@ export const useDeleteRate = () => {
     },
   })
 }
+
+export const useBulkUpsertRates = () => {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ratesApi.bulkUpsertRates,
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: [QK.rates] })
+      await invalidateFinancials(qc)
+    },
+  })
+}

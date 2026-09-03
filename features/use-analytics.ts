@@ -28,3 +28,9 @@ export const useSellerPerformance = () =>
     queryKey: [QK.metrics, "seller-performance"],
     queryFn: analyticsApi.getSellerPerformance,
   })
+
+export const useClientsOverdue = () =>
+  useQuery({
+    queryKey: [QK.metrics, "clients-overdue"],
+    queryFn: analyticsApi.getClientsOverdue,
+  })

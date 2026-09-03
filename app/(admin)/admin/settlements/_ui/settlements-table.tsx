@@ -9,6 +9,7 @@ import { useActiveSellers } from "@/features/use-sellers"
 import { useMe } from "@/features/use-auth"
 import { getErrorMessage } from "@/lib/handleError"
 import { PAGE_SIZE, toDataTablePagination } from "@/lib/pagination"
+import { SearchableSelect } from "@/components/primitives/searchable-select"
 import { SectionCard } from "@/components/primitives/section-card"
 import DataTable, {
   type DataTableColumn,
@@ -23,8 +24,13 @@ import { EditSettlementModal } from "./edit-settlement-modal"
 
 export function SettlementsTable() {
   const [page, setPage] = React.useState(1)
-  const { data, isPending } = useSettlements({ page, limit: PAGE_SIZE })
+  const [sellerFilter, setSellerFilter] = React.useState<number | undefined>()
   const { data: sellers = [] } = useActiveSellers()
+  const { data, isPending } = useSettlements({
+    page,
+    limit: PAGE_SIZE,
+    sellerId: sellerFilter,
+  })
   const { data: me } = useMe()
   const voidSettlement = useVoidSettlement()
   const settlements = data?.data ?? []
@@ -115,7 +121,24 @@ export function SettlementsTable() {
 
   return (
     <>
-      <SectionCard title="Historical USDT Settlement Logs">
+      <SectionCard
+        title="Historical USDT Settlement Logs"
+        action={
+          <SearchableSelect
+            value={sellerFilter ?? 0}
+            onChange={(v) => {
+              setSellerFilter(v || undefined)
+              setPage(1)
+            }}
+            options={[
+              { value: 0, label: "All Sellers" },
+              ...sellers.map((s) => ({ value: s.id, label: s.name })),
+            ]}
+            searchPlaceholder="Search sellers..."
+            className="w-56"
+          />
+        }
+      >
         <DataTable
           columns={columns}
           data={settlements}
