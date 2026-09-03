@@ -6,7 +6,12 @@ import { toast } from "sonner"
 
 import { findConduitSeller } from "@/lib/calc/rates"
 import { useActiveSellers } from "@/features/use-sellers"
-import { useCreateSettlement, usePreviewAllocation } from "@/features/use-settlements"
+import {
+  useCreateSettlement,
+  useCreateTransfer,
+  usePreviewAllocation,
+  usePreviewTransfer,
+} from "@/features/use-settlements"
 import { getErrorMessage } from "@/lib/handleError"
 import { todayISO } from "@/lib/date"
 import { useConfetti } from "@/hooks/use-confetti"
@@ -21,12 +26,24 @@ import { SubmitButton } from "@/components/primitives/submit-button"
 import { Usdt } from "@/components/primitives/money"
 import type { AllocationOverride } from "@/services/settlements.api"
 
+/**
+ * Two different events, deliberately not merged into one form.
+ *
+ * A supplier settlement spends BDT at that day's rate, so it needs a rate and
+ * it finalizes profit. One seller covering another spends nothing: it moves
+ * who owes the USDT and nothing else, so it has no rate field at all. Showing
+ * a rate there would invite recording a cost that was never paid.
+ */
+type SettlementMode = "supplier" | "transfer"
+
 export function SettlementForm() {
   const router = useRouter()
+  const [mode, setMode] = React.useState<SettlementMode>("supplier")
   const { data: sellers = [] } = useActiveSellers()
   const { data: balances } = useBalances()
   const sellerUsdtDues = balances?.sellerUsdtDues ?? {}
   const createSettlement = useCreateSettlement()
+  const createTransfer = useCreateTransfer()
   const fireConfetti = useConfetti()
 
   const conduitSeller = findConduitSeller(sellers)
@@ -48,10 +65,16 @@ export function SettlementForm() {
   const [overrides, setOverrides] = React.useState<Record<number, string> | null>(null)
 
   const numAmount = Number(usdtAmount) || undefined
+  const isTransfer = mode === "transfer"
+
   const { data: preview, isFetching: previewLoading } = usePreviewAllocation(
-    effectiveSellerId,
+    isTransfer ? undefined : effectiveSellerId,
     numAmount
   )
+  // In transfer mode the payee is the seller being paid off, so the preview
+  // walks THEIR obligations — the opposite direction from a settlement.
+  const { data: transferPreview, isFetching: transferPreviewLoading } =
+    usePreviewTransfer(isTransfer ? effectiveSellerId : undefined, numAmount)
   const proposal = preview?.allocations ?? []
 
   const inputsKey = `${effectiveSellerId ?? ""}:${usdtAmount}`
@@ -92,6 +115,36 @@ export function SettlementForm() {
     e.preventDefault()
     const num = Number(usdtAmount)
     if (!num || !effectiveSellerId) return
+
+    if (isTransfer) {
+      if (!effectivePayerId) {
+        toast.error("Select which seller is taking the obligation over.")
+        return
+      }
+      if (effectivePayerId === effectiveSellerId) {
+        toast.error("A seller cannot take over their own obligation.")
+        return
+      }
+      try {
+        await createTransfer.mutateAsync({
+          date,
+          fromSellerId: effectiveSellerId,
+          toSellerId: effectivePayerId,
+          usdtAmount: num,
+          note: note || undefined,
+        })
+        fireConfetti()
+        toast.success(
+          `${num.toLocaleString()} USDT obligation moved. No profit finalized — that waits for the supplier payment.`
+        )
+        setUsdtAmount("")
+        setNote("")
+      } catch (error) {
+        toast.error(getErrorMessage(error, "Failed to record the transfer."))
+      }
+      return
+    }
+
     if (!conduitSeller) {
       toast.error("No settlement conduit is configured yet.")
       return
@@ -127,9 +180,56 @@ export function SettlementForm() {
   }
 
   return (
-    <SectionCard title="Settle External Seller (USDT Allocation)">
+    <SectionCard
+      title={
+        isTransfer
+          ? "Seller Pays Another Seller (Obligation Transfer)"
+          : "Settle External Seller (USDT Allocation)"
+      }
+    >
       <form onSubmit={handleSubmit} className="space-y-4">
-        {!conduitSeller && (
+        <div
+          role="radiogroup"
+          aria-label="Settlement type"
+          className="grid grid-cols-1 gap-2 sm:grid-cols-2"
+        >
+          {(
+            [
+              {
+                value: "supplier" as const,
+                title: "Primary Supplier settlement",
+                blurb: "BDT is paid at today's rate. Finalizes profit.",
+              },
+              {
+                value: "transfer" as const,
+                title: "Seller pays another seller",
+                blurb: "Moves who owes the USDT. No rate, no profit yet.",
+              },
+            ] satisfies { value: SettlementMode; title: string; blurb: string }[]
+          ).map((option) => (
+            <button
+              key={option.value}
+              type="button"
+              role="radio"
+              aria-checked={mode === option.value}
+              onClick={() => setMode(option.value)}
+              className={
+                mode === option.value
+                  ? "cursor-pointer rounded-xl border border-emerald-300 bg-emerald-50/60 p-3 text-left ring-1 ring-emerald-200"
+                  : "cursor-pointer rounded-xl border border-slate-200 bg-white p-3 text-left hover:border-slate-300"
+              }
+            >
+              <span className="block text-xs font-bold text-slate-900">
+                {option.title}
+              </span>
+              <span className="mt-0.5 block text-[11px] text-slate-500">
+                {option.blurb}
+              </span>
+            </button>
+          ))}
+        </div>
+
+        {!conduitSeller && !isTransfer && (
           <Alert
             variant="warning"
             title="No settlement conduit configured"
@@ -142,7 +242,9 @@ export function SettlementForm() {
         )}
 
         <div className="space-y-1.5">
-          <Label htmlFor="settlement-seller">External Seller</Label>
+          <Label htmlFor="settlement-seller">
+            {isTransfer ? "Seller Being Paid Off" : "External Seller"}
+          </Label>
           <SearchableSelect
             id="settlement-seller"
             value={effectiveSellerId}
@@ -165,11 +267,15 @@ export function SettlementForm() {
               onChange={(value) => setDate(value)}
             />
             <p className="text-[11px] text-slate-400">
-              The USDT rate for this date must already be on file (Rates screen).
+              {isTransfer
+                ? "No rate needed — nothing is bought here, the liability just moves."
+                : "The USDT rate for this date must already be on file (Rates screen)."}
             </p>
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="settlement-usdt">USDT Amount Fronted</Label>
+            <Label htmlFor="settlement-usdt">
+              {isTransfer ? "USDT Taken Over" : "USDT Amount Fronted"}
+            </Label>
             <Input
               id="settlement-usdt"
               type="number"
@@ -182,17 +288,24 @@ export function SettlementForm() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="settlement-payer">Fronted By</Label>
+          <Label htmlFor="settlement-payer">
+            {isTransfer ? "Seller Taking It Over" : "Fronted By"}
+          </Label>
           <SearchableSelect
             id="settlement-payer"
             value={effectivePayerId}
             onChange={setPayerId}
-            options={sellers.map((s) => ({
+            options={(isTransfer
+              ? externalSellers.filter((s) => s.id !== effectiveSellerId)
+              : sellers
+            ).map((s) => ({
               value: s.id,
               label: `${s.flag ?? ""} ${s.name}`.trim(),
-              sublabel: s.isSettlementConduit
-                ? "Settlement conduit"
-                : "Fronting on the business's behalf",
+              sublabel: isTransfer
+                ? `Will owe ${(sellerUsdtDues[s.id] ?? 0).toLocaleString()} USDT + this`
+                : s.isSettlementConduit
+                  ? "Settlement conduit"
+                  : "Fronting on the business's behalf",
             }))}
             searchPlaceholder="Search sellers..."
             placeholder="Select who paid"
@@ -209,7 +322,7 @@ export function SettlementForm() {
           />
         </div>
 
-        {exceedsOutstanding && selectedSeller ? (
+        {!isTransfer && exceedsOutstanding && selectedSeller ? (
           <Alert
             variant="info"
             title="This will create an advance"
@@ -221,7 +334,49 @@ export function SettlementForm() {
           />
         ) : null}
 
-        {selectedSeller && numAmount ? (
+        {isTransfer && selectedSeller && numAmount ? (
+          <div className="space-y-2 rounded-xl border border-violet-200/70 bg-violet-50/40 p-4">
+            <p className="text-[11px] font-bold tracking-wide text-violet-700 uppercase">
+              Obligations Moving (FIFO)
+            </p>
+            {transferPreviewLoading ? (
+              <p className="text-xs text-slate-400">Loading obligations…</p>
+            ) : (transferPreview?.moves.length ?? 0) === 0 ? (
+              <p className="text-xs text-slate-500">
+                {selectedSeller.name} has nothing outstanding to take over.
+              </p>
+            ) : (
+              <div className="space-y-1.5">
+                {transferPreview?.moves.map((m) => (
+                  <div
+                    key={m.obligation_id}
+                    className="flex items-center justify-between gap-3 text-xs"
+                  >
+                    <span className="font-mono text-slate-500">
+                      Trade #{m.transaction_id ?? "—"}
+                    </span>
+                    <span className="font-mono font-semibold text-slate-700">
+                      <Usdt value={m.usdt_amount} />
+                    </span>
+                  </div>
+                ))}
+                <p className="border-t border-violet-200/70 pt-2 text-[11px] text-slate-600">
+                  These stay unpaid — they just move to the other seller.
+                  Profit finalizes when the Primary Supplier is paid.
+                </p>
+              </div>
+            )}
+            {(transferPreview?.unmoved_usdt ?? 0) > 0 && (
+              <p className="text-[11px] font-semibold text-rose-600">
+                {selectedSeller.name} only owes{" "}
+                {(transferPreview?.max_transferable_usdt ?? 0).toLocaleString()}{" "}
+                USDT — reduce the amount.
+              </p>
+            )}
+          </div>
+        ) : null}
+
+        {!isTransfer && selectedSeller && numAmount ? (
           <div className="space-y-2 rounded-xl bg-slate-50 p-4">
             <div className="flex items-center justify-between">
               <p className="text-[11px] font-bold tracking-wide text-slate-500 uppercase">
@@ -287,12 +442,19 @@ export function SettlementForm() {
           type="submit"
           className="w-full"
           disabled={
-            !conduitSeller || (isOverridden && !allocationSumMatches)
+            isTransfer
+              ? (transferPreview?.unmoved_usdt ?? 0) > 0 ||
+                effectivePayerId === effectiveSellerId
+              : !conduitSeller || (isOverridden && !allocationSumMatches)
           }
-          isSubmitting={createSettlement.isPending}
-          pendingLabel="Logging settlement…"
+          isSubmitting={
+            isTransfer ? createTransfer.isPending : createSettlement.isPending
+          }
+          pendingLabel={
+            isTransfer ? "Recording transfer…" : "Logging settlement…"
+          }
         >
-          Log Settlement
+          {isTransfer ? "Record Obligation Transfer" : "Log Settlement"}
         </SubmitButton>
       </form>
     </SectionCard>

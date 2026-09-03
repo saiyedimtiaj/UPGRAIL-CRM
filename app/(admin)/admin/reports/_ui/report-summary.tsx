@@ -33,6 +33,7 @@ export function ReportSummary({
     <div className="grid h-full grid-cols-1 gap-5 sm:grid-cols-3">
       <StatCard
         tone="light"
+        accent="sky"
         icon={BarChart3}
         label="Total Filtered Volume"
         value={totalVolumeUSD}
@@ -40,6 +41,7 @@ export function ReportSummary({
       />
       <StatCard
         tone="light"
+        accent="emerald"
         icon={TrendingUp}
         label="Filtered Realized Profit"
         value={totalProfit}
@@ -47,6 +49,7 @@ export function ReportSummary({
       />
       <StatCard
         tone="light"
+        accent="violet"
         icon={Wallet}
         label="Average Trade Size"
         value={avgTradeUSD}

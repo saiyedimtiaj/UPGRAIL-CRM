@@ -182,6 +182,7 @@ export function SellerDetail({ id }: { id: number }) {
             )}
             <StatCard
               tone="light"
+              accent="sky"
               icon={Zap}
               label="USD Supplied"
               value={totalUsdSupplied}

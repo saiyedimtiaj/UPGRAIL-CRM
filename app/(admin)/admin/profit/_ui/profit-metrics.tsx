@@ -21,18 +21,21 @@ export function ProfitMetrics() {
       />
       <StatCard
         tone="light"
+        accent="sky"
         label="Profit Taken Out"
         value={metrics?.profitTakenOut ?? 0}
         format={(n) => bdt(n)}
       />
       <StatCard
         tone="light"
+        accent="emerald"
         label="Profit Remaining"
         value={metrics?.profitRemaining ?? 0}
         format={(n) => bdt(n)}
       />
       <StatCard
         tone="light"
+        accent="amber"
         label="Profit Pending"
         value={metrics?.profitPendingClientSalesValue ?? 0}
         format={(n) => bdt(n)}

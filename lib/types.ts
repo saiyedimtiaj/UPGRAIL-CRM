@@ -235,8 +235,8 @@ export interface Balances {
   clientDues: Record<number, number>
   /** Negative means the seller holds our credit (an advance). */
   sellerUsdtDues: Record<number, number>
-  /** BDT a seller is owed for money they fronted on our behalf. */
-  sellerFrontingBalances: Record<number, number>
+  /** USDT of other sellers' obligations each seller has taken on. */
+  sellerObligationsHeld: Record<number, number>
   /** USDT paid ahead of what a seller's trades could absorb. */
   sellerAdvances: Record<number, number>
   nazmulDue: number

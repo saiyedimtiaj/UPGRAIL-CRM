@@ -89,6 +89,7 @@ export function KpiRow() {
       <motion.div variants={staggerChild} className="h-full">
         <StatCard
           tone="light"
+          accent="amber"
           icon={Landmark}
           label="Total Client Due"
           value={metrics.totalClientDue}
@@ -108,6 +109,7 @@ export function KpiRow() {
       <motion.div variants={staggerChild} className="h-full">
         <StatCard
           tone="light"
+          accent="sky"
           icon={Banknote}
           label="Nazmul Due"
           value={metrics.nazmulDue}

@@ -14,26 +14,34 @@ export function ProfitOverview() {
     return <Skeleton className="h-40 w-full rounded-2xl" />
   }
 
+  // Same hues the stat cards use: emerald is profit earned, sky is money that
+  // has left for the bank, amber is money still sitting with us.
   const items = [
     {
       label: "Earned Profit",
       value: metrics.totalEarnedProfit,
       icon: TrendingUp,
-      tone: "text-emerald-700",
+      icon_tone: "text-emerald-600",
+      surface: "border-emerald-200/70 bg-emerald-50/40",
+      label_tone: "text-emerald-700/80",
       hint: "Finalized trades only",
     },
     {
       label: "Profit Taken Out",
       value: metrics.profitTakenOut,
       icon: Wallet,
-      tone: "text-slate-700",
+      icon_tone: "text-sky-600",
+      surface: "border-sky-200/70 bg-sky-50/40",
+      label_tone: "text-sky-700/80",
       hint: "Reached Profit Bank",
     },
     {
       label: "Profit Remaining",
       value: metrics.profitRemaining,
       icon: Clock,
-      tone: "text-amber-700",
+      icon_tone: "text-amber-600",
+      surface: "border-amber-200/70 bg-amber-50/40",
+      label_tone: "text-amber-700/80",
       hint: "Earned, not yet taken out",
     },
   ]
@@ -41,21 +49,22 @@ export function ProfitOverview() {
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        {items.map(({ label, value, icon: Icon, tone, hint }) => (
-          <div
-            key={label}
-            className="rounded-2xl border border-slate-200 bg-white p-4"
-          >
-            <div className="flex items-center gap-2 text-[11px] font-semibold tracking-wide text-slate-500 uppercase">
-              <Icon className={`h-3.5 w-3.5 ${tone}`} />
+        {items.map(
+          ({ label, value, icon: Icon, icon_tone, surface, label_tone, hint }) => (
+          <div key={label} className={`rounded-2xl border p-4 ${surface}`}>
+            <div
+              className={`flex items-center gap-2 text-[11px] font-semibold tracking-wide uppercase ${label_tone}`}
+            >
+              <Icon className={`h-3.5 w-3.5 ${icon_tone}`} />
               {label}
             </div>
             <div className="mt-2 font-mono text-xl font-bold tracking-tight tabular-nums text-slate-900">
               {bdt(value)}
             </div>
-            <div className="mt-0.5 text-[11px] text-slate-400">{hint}</div>
+            <div className="mt-0.5 text-[11px] text-slate-500">{hint}</div>
           </div>
-        ))}
+          )
+        )}
       </div>
 
       {metrics.profitPendingCount > 0 && (

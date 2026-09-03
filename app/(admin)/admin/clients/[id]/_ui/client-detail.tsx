@@ -145,6 +145,7 @@ export function ClientDetail({ id }: { id: number }) {
             />
             <StatCard
               tone="light"
+              accent="sky"
               icon={TrendingUp}
               label="Lifetime Volume"
               value={totalUsdVolume}
@@ -157,6 +158,7 @@ export function ClientDetail({ id }: { id: number }) {
               }
             />
             <StatCard
+              accent="emerald"
               icon={TrendingUp}
               label="Total Profit"
               value={totalProfit}

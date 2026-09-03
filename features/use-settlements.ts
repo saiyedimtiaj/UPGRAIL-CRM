@@ -4,6 +4,7 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import * as settlementsApi from "@/services/settlements.api"
 import type {
   CreateSettlementPayload,
+  CreateTransferPayload,
   SettlementListParams,
 } from "@/services/settlements.api"
 import { QK, invalidateFinancials } from "@/features/query-keys"
@@ -54,6 +55,41 @@ export const useVoidSettlement = () => {
   return useMutation({
     mutationFn: ({ id, reason }: { id: number; reason: string }) =>
       settlementsApi.voidSettlement(id, reason),
+    onSuccess: () => invalidateFinancials(qc),
+  })
+}
+
+export const usePreviewTransfer = (
+  fromSellerId: number | undefined,
+  usdtAmount: number | undefined,
+) =>
+  useQuery({
+    queryKey: [QK.settlements, "preview-transfer", fromSellerId, usdtAmount],
+    queryFn: () => settlementsApi.previewTransfer(fromSellerId!, usdtAmount!),
+    enabled: fromSellerId !== undefined && !!usdtAmount && usdtAmount > 0,
+  })
+
+export const useTransfers = (params: SettlementListParams = {}) =>
+  useQuery({
+    queryKey: [QK.settlements, "transfers", params],
+    queryFn: () => settlementsApi.getTransfers(params),
+    placeholderData: keepPreviousData,
+  })
+
+export const useCreateTransfer = () => {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: (payload: CreateTransferPayload) =>
+      settlementsApi.createTransfer(payload),
+    onSuccess: () => invalidateFinancials(qc),
+  })
+}
+
+export const useVoidTransfer = () => {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: number; reason: string }) =>
+      settlementsApi.voidTransfer(id, reason),
     onSuccess: () => invalidateFinancials(qc),
   })
 }

@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { ArrowRight, Landmark } from "lucide-react"
 
-import { bdt } from "@/lib/format"
+import { bdt, usdt } from "@/lib/format"
 import { useBalances } from "@/features/use-analytics"
 import { useActiveSellers } from "@/features/use-sellers"
 import { findConduitSeller } from "@/lib/calc/rates"
@@ -48,7 +48,7 @@ export default function PrimarySupplierPage() {
     )
   }
 
-  const fronted = balances?.sellerFrontingBalances?.[conduit.id] ?? 0
+  const obligationsHeld = balances?.sellerObligationsHeld?.[conduit.id] ?? 0
 
   return (
     <div className="w-full space-y-5 p-4 sm:space-y-6 sm:p-6">
@@ -72,13 +72,14 @@ export default function PrimarySupplierPage() {
           }
         />
         <StatCard
+          accent="violet"
           icon={ArrowRight}
-          label="Fronted for Others (BDT)"
-          value={fronted}
-          format={(n) => bdt(n)}
+          label="Obligations Held (USDT)"
+          value={obligationsHeld}
+          format={(n) => usdt(n)}
           footer={
             <span className="text-[11px] font-semibold text-slate-500">
-              Net of anything fronted for them
+              Other sellers&rsquo; USDT taken over, still owed onward
             </span>
           }
         />

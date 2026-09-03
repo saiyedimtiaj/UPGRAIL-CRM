@@ -77,3 +77,82 @@ export async function voidSettlement(id: number, reason: string): Promise<{ mess
   const { data } = await api.patch(`/settlements/${id}/void`, { reason })
   return data
 }
+
+export interface ObligationTransferLine {
+  id: number
+  transfer_id: number
+  obligation_id: number
+  usdt_amount: number
+}
+
+export interface ObligationTransfer {
+  id: number
+  date: string
+  from_seller_id: number
+  from_seller_name: string
+  to_seller_id: number
+  to_seller_name: string
+  usdt_amount: number
+  entered_by: number
+  note?: string
+  voided: boolean
+  created_at: string
+  lines?: ObligationTransferLine[]
+}
+
+export interface TransferPreviewRow {
+  obligation_id: number
+  transaction_id: number | null
+  usdt_amount: number
+}
+
+export interface TransferPreview {
+  moves: TransferPreviewRow[]
+  requested_usdt: number
+  moved_usdt: number
+  /** Above zero means the payee is not owed that much. */
+  unmoved_usdt: number
+  max_transferable_usdt: number
+}
+
+export async function previewTransfer(
+  fromSellerId: number,
+  usdtAmount: number,
+): Promise<TransferPreview> {
+  const { data } = await api.get("/settlements/preview-transfer", {
+    params: { fromSellerId, usdtAmount },
+  })
+  return data
+}
+
+export interface CreateTransferPayload {
+  date: string
+  fromSellerId: number
+  toSellerId: number
+  usdtAmount: number
+  note?: string
+}
+
+export async function createTransfer(
+  payload: CreateTransferPayload,
+): Promise<ObligationTransfer> {
+  const { data } = await api.post("/settlements/transfer", payload)
+  return data
+}
+
+export async function getTransfers(
+  params: SettlementListParams = {},
+): Promise<PaginatedResponse<ObligationTransfer>> {
+  const { data } = await api.get("/settlements/transfers", { params })
+  return data
+}
+
+export async function voidTransfer(
+  id: number,
+  reason: string,
+): Promise<ObligationTransfer> {
+  const { data } = await api.patch(`/settlements/transfers/${id}/void`, {
+    reason,
+  })
+  return data
+}
