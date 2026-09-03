@@ -5,12 +5,34 @@ import Link from "next/link"
 
 import type { ProfitStatus, Transaction } from "@/lib/types"
 import { useTransactions } from "@/features/use-transactions"
+import { useActiveClients } from "@/features/use-clients"
+import { useActiveSellers } from "@/features/use-sellers"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
+import { useUrlFilters } from "@/hooks/use-url-filters"
 import { PAGE_SIZE, toDataTablePagination } from "@/lib/pagination"
 import { shortDate, timeOnly } from "@/lib/date"
 import { Bdt, Usdt } from "@/components/primitives/money"
 import { ProfitStatusBadge } from "@/components/primitives/profit-status-badge"
 import DataTable, { type DataTableColumn } from "@/components/shared/data-table"
+import { FilterBar, type FilterFieldDef } from "@/components/shared/filter-bar"
+
+const STATUS_OPTIONS = [
+  { value: "all", label: "All" },
+  { value: "FINALIZED", label: "Finalized" },
+  { value: "AWAITING_DAILY_RATE", label: "Awaiting Rate" },
+  { value: "PENDING_UNSETTLED", label: "Pending" },
+  { value: "PENDING_PARTIAL", label: "Partially Settled" },
+  { value: "VOIDED", label: "Cancelled" },
+]
+
+const EMPTY_INLINE_FILTERS = {
+  clientId: undefined as number | undefined,
+  sellerId: undefined as number | undefined,
+  status: "all",
+  dateFrom: "",
+  dateTo: "",
+  search: "",
+}
 
 export type TransactionColumnKey =
   | "id"
@@ -48,28 +70,119 @@ export function TransactionsTable({
   hide = [],
   actions,
   emptyLabel = "transactions",
+  showFilters = false,
 }: {
   filters?: TransactionsTableFilters
   hide?: TransactionColumnKey[]
   actions?: (row: Transaction) => React.ReactNode
   emptyLabel?: string
+  /** Renders a filter bar inside the table's own box. `filters` still wins —
+   *  a value it sets (e.g. a client detail page pinning clientId) is fixed
+   *  and dropped from the bar rather than offered as an editable field. */
+  showFilters?: boolean
 }) {
   const [page, setPage] = React.useState(1)
-  const debouncedSearch = useDebouncedValue(filters.search ?? "")
+
+  const { data: clients = [] } = useActiveClients()
+  const { data: sellers = [] } = useActiveSellers()
+  const {
+    filters: inline,
+    setFilters: setInline,
+    reset: resetInline,
+    isDirty: inlineDirty,
+  } = useUrlFilters(EMPTY_INLINE_FILTERS)
+  const debouncedInlineSearch = useDebouncedValue(inline.search)
+
+  // `filters` (the caller's pinned values) always wins over the bar's own
+  // state — a client detail page fixes clientId, so that field never
+  // reaches the bar at all.
+  const effectiveFilters: TransactionsTableFilters = showFilters
+    ? {
+        clientId: filters.clientId ?? inline.clientId,
+        sellerId: filters.sellerId ?? inline.sellerId,
+        dateFrom: filters.dateFrom ?? (inline.dateFrom || undefined),
+        dateTo: filters.dateTo ?? (inline.dateTo || undefined),
+        search: filters.search ?? (debouncedInlineSearch || undefined),
+        ...(filters.profitStatus !== undefined || filters.voided !== undefined
+          ? {
+              profitStatus: filters.profitStatus,
+              voided: filters.voided,
+            }
+          : inline.status === "all"
+            ? {}
+            : inline.status === "VOIDED"
+              ? { voided: true }
+              : {
+                  profitStatus: inline.status as ProfitStatus,
+                  voided: false,
+                }),
+      }
+    : filters
+
+  const debouncedSearch = useDebouncedValue(
+    showFilters ? "" : (filters.search ?? "")
+  )
 
   // Any filter change invalidates the current page number.
-  const filterKey = JSON.stringify({ ...filters, search: debouncedSearch })
+  const filterKey = JSON.stringify({
+    ...effectiveFilters,
+    search: showFilters ? debouncedInlineSearch : debouncedSearch,
+  })
   const [seenKey, setSeenKey] = React.useState(filterKey)
   if (seenKey !== filterKey) {
     setSeenKey(filterKey)
     if (page !== 1) setPage(1)
   }
 
+  const filterFields: FilterFieldDef[] = [
+    {
+      kind: "search",
+      key: "search",
+      label: "Search",
+      placeholder: "Search by ID, client, or seller…",
+    },
+    ...(filters.clientId === undefined
+      ? ([
+          {
+            kind: "searchable",
+            key: "clientId",
+            label: "Client",
+            options: [
+              { value: 0, label: "All Clients" },
+              ...clients.map((c) => ({ value: c.id, label: c.name })),
+            ],
+            placeholder: "All Clients",
+          },
+        ] as FilterFieldDef[])
+      : []),
+    ...(filters.sellerId === undefined
+      ? ([
+          {
+            kind: "searchable",
+            key: "sellerId",
+            label: "Seller",
+            options: [
+              { value: 0, label: "All Sellers" },
+              ...sellers.map((s) => ({ value: s.id, label: s.name })),
+            ],
+            placeholder: "All Sellers",
+          },
+        ] as FilterFieldDef[])
+      : []),
+    {
+      kind: "select",
+      key: "status",
+      label: "Status",
+      options: STATUS_OPTIONS,
+    },
+    { kind: "date", key: "dateFrom", label: "Date From" },
+    { kind: "date", key: "dateTo", label: "Date To" },
+  ]
+
   const { data, isPending, isFetching } = useTransactions({
     page,
     limit: PAGE_SIZE,
-    ...filters,
-    search: debouncedSearch || undefined,
+    ...effectiveFilters,
   })
 
   const rows = data?.data ?? []
@@ -240,6 +353,17 @@ export function TransactionsTable({
       pagination={toDataTablePagination(data?.meta)}
       onPageChange={setPage}
       entityLabel={emptyLabel}
+      toolbar={
+        showFilters ? (
+          <FilterBar
+            fields={filterFields}
+            value={inline}
+            onChange={setInline}
+            onReset={resetInline}
+            isDirty={inlineDirty}
+          />
+        ) : undefined
+      }
       footerLeft={
         isFetching && !isPending ? (
           <span className="text-xs text-slate-400">Updating…</span>

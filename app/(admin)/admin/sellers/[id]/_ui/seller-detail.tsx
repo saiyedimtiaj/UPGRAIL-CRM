@@ -263,6 +263,7 @@ export function SellerDetail({ id }: { id: number }) {
                 filters={{ sellerId: seller.id }}
                 hide={["seller"]}
                 emptyLabel="transactions"
+                showFilters
               />
             </SectionCard>
           </motion.div>

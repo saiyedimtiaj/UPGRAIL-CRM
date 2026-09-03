@@ -50,6 +50,9 @@ export interface DataTableProps<T> {
   emptyState?: React.ReactNode
   entityLabel?: string
 
+  /** Rendered inside the same bordered box as the table, above its header —
+   *  a filter bar belongs here rather than in a separate card above it. */
+  toolbar?: React.ReactNode
   mobileCard?: (row: T) => React.ReactNode
   rowClassName?: (row: T) => string
   footerLeft?: React.ReactNode
@@ -87,6 +90,11 @@ function SortIcon({
   )
 }
 
+/**
+ * Just the `<table>` markup — no outer border. `DataTable` supplies the one
+ * bordered box every branch (skeleton, empty, loaded) renders inside, so a
+ * toolbar sits in that same box rather than looking like a second panel.
+ */
 function TableSkeleton<T>({
   columns,
   rows,
@@ -95,7 +103,7 @@ function TableSkeleton<T>({
   rows: number
 }) {
   return (
-    <div className="overflow-hidden rounded-card border border-zinc-200/90">
+    <>
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
@@ -132,7 +140,7 @@ function TableSkeleton<T>({
           </tbody>
         </table>
       </div>
-    </div>
+    </>
   )
 }
 
@@ -274,6 +282,7 @@ export default function DataTable<T>({
   skeletonRows = 6,
   emptyState,
   entityLabel = "items",
+  toolbar,
   mobileCard,
   rowClassName,
   footerLeft,
@@ -289,8 +298,22 @@ export default function DataTable<T>({
     data.length > 0 &&
     data.every((row) => selectedKeys?.has(rowKey(row)))
 
+  // One outer box wraps every branch below, so a toolbar (a filter bar,
+  // typically) sits inside the same panel as the table rather than reading
+  // as a second, separate card stacked above it.
+  const shell = (content: React.ReactNode) => (
+    <div className="overflow-hidden rounded-card border border-zinc-200/90">
+      {toolbar && (
+        <div className="border-b border-zinc-100 bg-slate-50/40 px-5 py-4">
+          {toolbar}
+        </div>
+      )}
+      {content}
+    </div>
+  )
+
   if (isLoading) {
-    return <TableSkeleton columns={columns} rows={skeletonRows} />
+    return shell(<TableSkeleton columns={columns} rows={skeletonRows} />)
   }
 
   if (!data || data.length === 0) {
@@ -302,8 +325,8 @@ export default function DataTable<T>({
       />
     )
 
-    return (
-      <div className="overflow-hidden rounded-card border border-zinc-200/90">
+    return shell(
+      <>
         <div
           className={`${mobileCard ? "hidden md:block" : ""} overflow-x-auto`}
         >
@@ -346,12 +369,12 @@ export default function DataTable<T>({
         </div>
 
         <div className="md:hidden">{emptyState ?? fallback}</div>
-      </div>
+      </>
     )
   }
 
-  return (
-    <div className="overflow-hidden rounded-card border border-zinc-200/90">
+  return shell(
+    <>
       {mobileCard && (
         <div className="divide-y divide-zinc-100 md:hidden">
           {data.map((row) => (
@@ -455,6 +478,6 @@ export default function DataTable<T>({
           footerLeft={footerLeft}
         />
       )}
-    </div>
+    </>
   )
 }
