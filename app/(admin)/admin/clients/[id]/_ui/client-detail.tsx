@@ -5,7 +5,7 @@ import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { motion } from "motion/react"
-import { ArrowLeft, Pencil, Plus, Users, Wallet, TrendingUp, ArrowDownLeft } from "lucide-react"
+import { ArrowLeft, Pencil, Plus, Users, Wallet, TrendingUp, ArrowDownLeft, X } from "lucide-react"
 
 import { staggerChild, staggerParent } from "@/lib/animations"
 import { useClient, useUpdateClient, useDeleteClient } from "@/features/use-clients"
@@ -13,10 +13,12 @@ import { useTransactions } from "@/features/use-transactions"
 import { usePayments } from "@/features/use-payments"
 import { useBalances } from "@/features/use-analytics"
 import { getErrorMessage } from "@/lib/handleError"
-import { shortDate } from "@/lib/date"
+import { shortDate, todayISO } from "@/lib/date"
 import { bdt, usd } from "@/lib/format"
 import { PageHeader } from "@/components/primitives/page-header"
 import { StatCard } from "@/components/primitives/stat-card"
+import { DatePicker } from "@/components/ui/date-picker"
+import { Label } from "@/components/ui/label"
 import { TransactionsTable } from "@/components/shared/transactions-table"
 import { SectionCard } from "@/components/primitives/section-card"
 import { DetailField } from "@/components/primitives/detail-field"
@@ -41,14 +43,23 @@ export function ClientDetail({ id }: { id: number }) {
   const updateClient = useUpdateClient()
   const deleteClient = useDeleteClient()
 
+  // Empty means lifetime — the stats row filters to this range without
+  // touching the Transactions/Payments tables further down the page.
+  const [statsRange, setStatsRange] = React.useState({ from: "", to: "" })
+  const hasRangeFilter = statsRange.from !== "" || statsRange.to !== ""
+
   const { data: totalsTx } = useTransactions({
     clientId: validId ?? undefined,
     limit: TOTALS_LIMIT,
+    dateFrom: statsRange.from || undefined,
+    dateTo: statsRange.to || undefined,
   })
   const { data: totalsPay } = usePayments({
     partyType: "CLIENT",
     partyId: validId ?? undefined,
     limit: TOTALS_LIMIT,
+    dateFrom: statsRange.from || undefined,
+    dateTo: statsRange.to || undefined,
   })
 
   const [editOpen, setEditOpen] = React.useState(false)
@@ -64,7 +75,6 @@ export function ClientDetail({ id }: { id: number }) {
   const nonVoidedTrades = (totalsTx?.data ?? []).filter((t) => !t.voided)
   const totalUsdVolume = nonVoidedTrades.reduce((sum, t) => sum + t.usd_amount, 0)
   const totalClientCharge = nonVoidedTrades.reduce((sum, t) => sum + (t.sell_bdt ?? 0), 0)
-  // Only finalized trades carry a profit figure; the rest are still pending.
   const totalProfit = nonVoidedTrades.reduce((sum, t) => sum + (t.profit ?? 0), 0)
   const nonVoidedPayments = (totalsPay?.data ?? []).filter((p) => !p.voided)
   const lifetimePaid = nonVoidedPayments.reduce(
@@ -74,6 +84,13 @@ export function ClientDetail({ id }: { id: number }) {
   const lastPayment = nonVoidedPayments[0]
   const totalsTruncated =
     (totalsTx?.meta.totalCount ?? 0) > TOTALS_LIMIT || (totalsPay?.meta.totalCount ?? 0) > TOTALS_LIMIT
+  const rangePostedCharges = nonVoidedTrades
+    .filter((t) => t.client_charge_status === "POSTED")
+    .reduce((sum, t) => sum + (t.sell_bdt ?? 0), 0)
+  const rangeDue = rangePostedCharges - lifetimePaid
+  const outstandingDue = hasRangeFilter
+    ? rangeDue
+    : (balances?.clientDues[client?.id ?? -1] ?? 0)
 
   return (
     <PartyDetailShell
@@ -134,6 +151,49 @@ export function ClientDetail({ id }: { id: number }) {
             </motion.div>
           )}
 
+          <motion.div variants={staggerChild} className="flex justify-end">
+            <div className="flex flex-wrap items-end gap-2.5">
+              <div className="space-y-1.5">
+                <Label htmlFor="stats-date-from" className="text-[11px] text-slate-500">
+                  From
+                </Label>
+                <DatePicker
+                  id="stats-date-from"
+                  value={statsRange.from}
+                  onChange={(next) => setStatsRange((r) => ({ ...r, from: next }))}
+                  max={statsRange.to || todayISO()}
+                  clearable
+                  className="h-9 w-40"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="stats-date-to" className="text-[11px] text-slate-500">
+                  To
+                </Label>
+                <DatePicker
+                  id="stats-date-to"
+                  value={statsRange.to}
+                  onChange={(next) => setStatsRange((r) => ({ ...r, to: next }))}
+                  min={statsRange.from || undefined}
+                  max={todayISO()}
+                  clearable
+                  className="h-9 w-40"
+                />
+              </div>
+              {hasRangeFilter && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 gap-1 text-slate-500"
+                  onClick={() => setStatsRange({ from: "", to: "" })}
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Clear
+                </Button>
+              )}
+            </div>
+          </motion.div>
+
           <motion.div
             variants={staggerChild}
             className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
@@ -141,12 +201,14 @@ export function ClientDetail({ id }: { id: number }) {
             <StatCard
               accent="amber"
               icon={Wallet}
-              label="Outstanding Due"
-              value={balances?.clientDues[client.id] ?? 0}
+              label={hasRangeFilter ? "Due in Range" : "Outstanding Due"}
+              value={outstandingDue}
               format={(n) => bdt(n)}
               footer={
                 <span className="text-[11px] font-semibold text-slate-500">
-                  Live receivable balance
+                  {hasRangeFilter
+                    ? "Charged minus paid, within this window"
+                    : "Live receivable balance"}
                 </span>
               }
             />
@@ -154,7 +216,7 @@ export function ClientDetail({ id }: { id: number }) {
               tone="light"
               accent="sky"
               icon={TrendingUp}
-              label="Lifetime Volume"
+              label={hasRangeFilter ? "Volume in Range" : "Lifetime Volume"}
               value={totalUsdVolume}
               format={(n) => usd(n)}
               footer={
@@ -167,7 +229,7 @@ export function ClientDetail({ id }: { id: number }) {
             <StatCard
               accent="emerald"
               icon={TrendingUp}
-              label="Total Profit"
+              label={hasRangeFilter ? "Profit in Range" : "Total Profit"}
               value={totalProfit}
               format={(n) => bdt(n)}
               footer={
@@ -179,7 +241,7 @@ export function ClientDetail({ id }: { id: number }) {
             <StatCard
               accent="teal"
               icon={ArrowDownLeft}
-              label="Lifetime Paid"
+              label={hasRangeFilter ? "Paid in Range" : "Lifetime Paid"}
               value={lifetimePaid}
               format={(n) => bdt(n)}
               footer={

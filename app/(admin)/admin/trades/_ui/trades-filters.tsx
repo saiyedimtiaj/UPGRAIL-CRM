@@ -35,9 +35,9 @@ const STATUS_OPTIONS = [
 ]
 
 const VOIDED_OPTIONS = [
-  { value: "all", label: "Voided + Active" },
+  { value: "all", label: "Disputed + Active" },
   { value: "false", label: "Active Only" },
-  { value: "true", label: "Voided Only" },
+  { value: "true", label: "Disputed Only" },
 ]
 
 export function TradesFilters({ value, onChange, clients, sellers }: TradesFiltersProps) {
@@ -118,7 +118,7 @@ export function TradesFilters({ value, onChange, clients, sellers }: TradesFilte
         />
       </div>
       <div className="space-y-1.5">
-        <Label htmlFor="trades-voided">Voided</Label>
+        <Label htmlFor="trades-voided">Disputed</Label>
         <SelectField
           id="trades-voided"
           value={value.voided}

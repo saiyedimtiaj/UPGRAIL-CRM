@@ -18,7 +18,7 @@ import DataTable, {
 import { RowActions } from "@/components/shared/row-actions"
 import { ConfirmDialog } from "@/components/primitives/confirm-dialog"
 import { StatusBadge } from "@/components/primitives/status-badge"
-import { Bdt, Usdt } from "@/components/primitives/money"
+import { Bdt, Rate, Usdt } from "@/components/primitives/money"
 import type { USDTSettlement } from "@/lib/types"
 import { usePermissions } from "@/hooks/use-permission"
 import { EditSettlementModal } from "./edit-settlement-modal"
@@ -145,7 +145,7 @@ export function SettlementsTable() {
     {
       key: "rate",
       header: "USDT Rate",
-      cell: (s) => <Bdt value={s.usdt_rate} />,
+      cell: (s) => <Rate value={s.usdt_rate} />,
       hideBelow: "lg",
     },
     {

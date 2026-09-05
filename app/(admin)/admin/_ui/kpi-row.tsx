@@ -5,12 +5,12 @@ import { motion } from "motion/react"
 import {
   ArrowUpRight,
   Banknote,
-  Coins,
   DollarSign,
   Landmark,
+  Wallet,
 } from "lucide-react"
 
-import { bdt, usd } from "@/lib/format"
+import { bdt, usd, usdt } from "@/lib/format"
 import { staggerChild, staggerParent } from "@/lib/animations"
 import { useMetrics, useTimeSeries } from "@/features/use-analytics"
 import { StatCard } from "@/components/primitives/stat-card"
@@ -129,20 +129,20 @@ export function KpiRow() {
       <motion.div variants={staggerChild} className="h-full">
         <StatCard
           tone="mint"
-          icon={Coins}
-          label="Total Earned Profit"
-          value={metrics.totalEarnedProfit}
-          format={(n) => bdt(n)}
-          delta={{
-            direction: "up",
-            label: `৳${metrics.profitRemaining.toLocaleString()} remaining`,
-          }}
+          icon={Wallet}
+          label="Seller USDT Due"
+          value={metrics.totalSellerUsdtDue}
+          format={(n) => usdt(n)}
           footer={
-            <div className="w-full border-t border-emerald-900/10 pt-2.5 text-[11px] font-semibold text-emerald-800/70">
+            <Link
+              href="/admin/seller-ledger"
+              className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 hover:text-emerald-800"
+            >
               {metrics.totalSellerUsdtDue > 0
-                ? `${metrics.totalSellerUsdtDue.toLocaleString()} USDT owed to sellers`
+                ? "View Seller Ledgers"
                 : "All sellers fully settled"}
-            </div>
+              <ArrowUpRight className="h-3 w-3" />
+            </Link>
           }
         />
       </motion.div>

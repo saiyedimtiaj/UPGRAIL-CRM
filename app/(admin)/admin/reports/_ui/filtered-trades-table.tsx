@@ -8,7 +8,7 @@ import DataTable, {
   type DataTableColumn,
 } from "@/components/shared/data-table"
 import { ProfitStatusBadge } from "@/components/primitives/profit-status-badge"
-import { Bdt, Usd, Usdt } from "@/components/primitives/money"
+import { Bdt, Rate, Usd, Usdt } from "@/components/primitives/money"
 import type { Transaction } from "@/lib/types"
 
 export function FilteredTradesTable({
@@ -39,7 +39,7 @@ export function FilteredTradesTable({
     {
       key: "sell_rate",
       header: "Client Rate",
-      cell: (t) => (t.client_rate ? <Bdt value={t.client_rate} /> : "—"),
+      cell: (t) => (t.client_rate ? <Rate value={t.client_rate} /> : "—"),
     },
     {
       key: "total_sell",

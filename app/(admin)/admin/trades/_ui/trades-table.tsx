@@ -3,7 +3,7 @@
 import * as React from "react"
 import { toast } from "sonner"
 
-import { useTransactions, useVoidTransaction, useDeleteTransaction } from "@/features/use-transactions"
+import { useTransactions, useVoidTransaction, useUnvoidTransaction, useDeleteTransaction } from "@/features/use-transactions"
 import { useActiveClients } from "@/features/use-clients"
 import { useActiveSellers } from "@/features/use-sellers"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
@@ -56,8 +56,10 @@ export function TradesTable() {
   const { data: clients = [] } = useActiveClients()
   const { data: sellers = [] } = useActiveSellers()
   const voidTransaction = useVoidTransaction()
+  const unvoidTransaction = useUnvoidTransaction()
   const deleteTransaction = useDeleteTransaction()
   const [voidTarget, setVoidTarget] = React.useState<Transaction | null>(null)
+  const [unvoidTarget, setUnvoidTarget] = React.useState<Transaction | null>(null)
   const [editTarget, setEditTarget] = React.useState<Transaction | null>(null)
   const [deleteTarget, setDeleteTarget] = React.useState<Transaction | null>(
     null
@@ -151,13 +153,29 @@ export function TradesTable() {
       header: "",
       align: "right",
       cell: (t) => {
-        if (!canManage || t.voided) return null
+        if (!canManage) return null
+
+        // A disputed/voided trade has one thing to do: put it back. Editing
+        // or disputing it again doesn't make sense until it's live again.
+        if (t.voided) {
+          return (
+            <RowActions
+              extraActions={[
+                {
+                  label: "Restore Trade",
+                  onSelect: () => setUnvoidTarget(t),
+                },
+              ]}
+            />
+          )
+        }
+
         return (
           <RowActions
             onEdit={() => setEditTarget(t)}
             extraActions={[
               {
-                label: "Void Trade",
+                label: "Dispute/Refund",
                 onSelect: () => setVoidTarget(t),
                 destructive: true,
               },
@@ -214,21 +232,42 @@ export function TradesTable() {
       <ConfirmDialog
         open={voidTarget !== null}
         onOpenChange={(open) => !open && setVoidTarget(null)}
-        title="Void Transaction"
-        description="Finalized transactions are never deleted — this marks the trade as voided and requires a reason for the audit trail."
+        title="Dispute / Refund Transaction"
+        description="Finalized transactions are never deleted — this marks the trade as disputed and requires a reason for the audit trail. It can be restored later if the dispute is resolved."
         requireReason
-        reasonLabel="Reason for voiding"
+        reasonLabel="Reason for dispute/refund"
         destructive
-        confirmLabel="Void Trade"
+        confirmLabel="Dispute/Refund"
         onConfirm={async (reason) => {
           if (!voidTarget || !reason) return
           try {
             await voidTransaction.mutateAsync({ id: voidTarget.id, reason })
-            toast.success(`Trade ${voidTarget.id} voided.`)
+            toast.success(`Trade ${voidTarget.id} marked as disputed.`)
           } catch (error) {
-            toast.error(getErrorMessage(error, "Failed to void trade."))
+            toast.error(getErrorMessage(error, "Failed to dispute trade."))
           } finally {
             setVoidTarget(null)
+          }
+        }}
+      />
+
+      <ConfirmDialog
+        open={unvoidTarget !== null}
+        onOpenChange={(open) => !open && setUnvoidTarget(null)}
+        title="Restore Trade"
+        description={`Reverse the dispute on trade ${unvoidTarget?.id ?? ""} and bring it back to its normal status? A reason is kept for the audit trail.`}
+        requireReason
+        reasonLabel="Reason for restoring"
+        confirmLabel="Restore Trade"
+        onConfirm={async (reason) => {
+          if (!unvoidTarget || !reason) return
+          try {
+            await unvoidTransaction.mutateAsync({ id: unvoidTarget.id, reason })
+            toast.success(`Trade ${unvoidTarget.id} restored.`)
+          } catch (error) {
+            toast.error(getErrorMessage(error, "Failed to restore trade."))
+          } finally {
+            setUnvoidTarget(null)
           }
         }}
       />

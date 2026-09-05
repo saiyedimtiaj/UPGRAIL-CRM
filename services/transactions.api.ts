@@ -80,6 +80,11 @@ export async function voidTransaction(id: number, reason: string): Promise<Trans
   return data
 }
 
+export async function unvoidTransaction(id: number, reason: string): Promise<Transaction> {
+  const { data } = await api.patch(`/transactions/${id}/unvoid`, { reason })
+  return data
+}
+
 export async function deleteTransaction(id: number): Promise<{ message: string }> {
   const { data } = await api.delete(`/transactions/${id}`)
   return data

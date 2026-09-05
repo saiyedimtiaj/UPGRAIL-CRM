@@ -21,6 +21,15 @@ export function usdt(value: number | undefined | null): string {
   return `${n.toLocaleString("en-US", { maximumFractionDigits: 2 })} USDT`
 }
 
+/** An exchange rate (e.g. BDT per USD/USDT) — a ratio, not a rounded currency amount, so decimals matter. */
+export function rate(value: number | undefined | null): string {
+  const n = value ?? 0
+  return n.toLocaleString("en-US", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })
+}
+
 export function pct(value: number | undefined | null): string {
   const n = value ?? 0
   return `${n.toFixed(2)}%`

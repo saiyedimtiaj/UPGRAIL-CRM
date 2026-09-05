@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils"
-import { bdt, bdtSigned, usd, usdt } from "@/lib/format"
+import { bdt, bdtSigned, rate, usd, usdt } from "@/lib/format"
 
 interface MoneyProps {
   value: number | undefined | null
@@ -42,6 +42,15 @@ export function Usdt({ value, className }: MoneyProps) {
   return (
     <span className={cn("font-mono tabular-nums", className)}>
       {usdt(value)}
+    </span>
+  )
+}
+
+/** An exchange rate (BDT/USD, BDT/USDT) — always shows 2 decimals, unlike Bdt which rounds to whole currency. */
+export function Rate({ value, className }: MoneyProps) {
+  return (
+    <span className={cn("font-mono tabular-nums", className)}>
+      {rate(value)}
     </span>
   )
 }

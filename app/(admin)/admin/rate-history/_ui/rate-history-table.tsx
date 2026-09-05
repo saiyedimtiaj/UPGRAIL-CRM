@@ -15,7 +15,7 @@ import DataTable, {
 } from "@/components/shared/data-table"
 import { RowActions } from "@/components/shared/row-actions"
 import { ConfirmDialog } from "@/components/primitives/confirm-dialog"
-import { Bdt } from "@/components/primitives/money"
+import { Rate } from "@/components/primitives/money"
 import type { DailyRate } from "@/lib/types"
 import { usePermissions } from "@/hooks/use-permission"
 import { EditRateModal } from "./edit-rate-modal"
@@ -100,7 +100,7 @@ export function RateHistoryTable() {
         r.kind === "CARD" ? (
           <span className="font-semibold text-slate-800">{r.value}%</span>
         ) : (
-          <Bdt value={r.value} className="font-semibold" />
+          <Rate value={r.value} className="font-semibold text-slate-800" />
         ),
     },
     {

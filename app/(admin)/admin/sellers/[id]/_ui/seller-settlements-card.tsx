@@ -14,7 +14,7 @@ import DataTable, {
 import { RowActions } from "@/components/shared/row-actions"
 import { ConfirmDialog } from "@/components/primitives/confirm-dialog"
 import { StatusBadge } from "@/components/primitives/status-badge"
-import { Bdt, Usdt } from "@/components/primitives/money"
+import { Bdt, Rate, Usdt } from "@/components/primitives/money"
 import type { USDTSettlement } from "@/lib/types"
 
 export function SellerSettlementsCard({
@@ -47,7 +47,7 @@ export function SellerSettlementsCard({
       ),
     },
     { key: "usdt", header: "USDT Amount", cell: (s) => <Usdt value={s.usdt_amount} /> },
-    { key: "rate", header: "USDT Rate", cell: (s) => <Bdt value={s.usdt_rate} />, hideBelow: "lg" },
+    { key: "rate", header: "USDT Rate", cell: (s) => <Rate value={s.usdt_rate} />, hideBelow: "lg" },
     { key: "bdt", header: "BDT Equivalent", cell: (s) => <Bdt value={s.bdt_equivalent} />, hideBelow: "lg" },
     {
       key: "allocations",

@@ -15,6 +15,7 @@ import {
   Zap,
   ArrowUpRight,
   ShieldCheck,
+  X,
 } from "lucide-react"
 
 import { staggerChild, staggerParent } from "@/lib/animations"
@@ -23,10 +24,12 @@ import { useTransactions } from "@/features/use-transactions"
 import { useSettlements } from "@/features/use-settlements"
 import { useBalances } from "@/features/use-analytics"
 import { getErrorMessage } from "@/lib/handleError"
-import { shortDate } from "@/lib/date"
+import { shortDate, todayISO } from "@/lib/date"
 import { bdt, usd, usdt } from "@/lib/format"
 import { PageHeader } from "@/components/primitives/page-header"
 import { StatCard } from "@/components/primitives/stat-card"
+import { DatePicker } from "@/components/ui/date-picker"
+import { Label } from "@/components/ui/label"
 import { TransactionsTable } from "@/components/shared/transactions-table"
 import { SectionCard } from "@/components/primitives/section-card"
 import { DetailField } from "@/components/primitives/detail-field"
@@ -54,13 +57,22 @@ export function SellerDetail({ id }: { id: number }) {
   const deleteSeller = useDeleteSeller()
   const setConduit = useSetSettlementConduit()
 
+  // Empty means lifetime — the stats row filters to this range without
+  // touching the Transactions/Settlements tables further down the page.
+  const [statsRange, setStatsRange] = React.useState({ from: "", to: "" })
+  const hasRangeFilter = statsRange.from !== "" || statsRange.to !== ""
+
   const { data: totalsTx } = useTransactions({
     sellerId: validId ?? undefined,
     limit: TOTALS_LIMIT,
+    dateFrom: statsRange.from || undefined,
+    dateTo: statsRange.to || undefined,
   })
   const { data: totalsSettlements } = useSettlements({
     sellerId: validId ?? undefined,
     limit: TOTALS_LIMIT,
+    dateFrom: statsRange.from || undefined,
+    dateTo: statsRange.to || undefined,
   })
 
   const [editOpen, setEditOpen] = React.useState(false)
@@ -160,6 +172,49 @@ export function SellerDetail({ id }: { id: number }) {
             </motion.div>
           )}
 
+          <motion.div variants={staggerChild} className="flex justify-end">
+            <div className="flex flex-wrap items-end gap-2.5">
+              <div className="space-y-1.5">
+                <Label htmlFor="seller-stats-date-from" className="text-[11px] text-slate-500">
+                  From
+                </Label>
+                <DatePicker
+                  id="seller-stats-date-from"
+                  value={statsRange.from}
+                  onChange={(next) => setStatsRange((r) => ({ ...r, from: next }))}
+                  max={statsRange.to || todayISO()}
+                  clearable
+                  className="h-9 w-40"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="seller-stats-date-to" className="text-[11px] text-slate-500">
+                  To
+                </Label>
+                <DatePicker
+                  id="seller-stats-date-to"
+                  value={statsRange.to}
+                  onChange={(next) => setStatsRange((r) => ({ ...r, to: next }))}
+                  min={statsRange.from || undefined}
+                  max={todayISO()}
+                  clearable
+                  className="h-9 w-40"
+                />
+              </div>
+              {hasRangeFilter && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-9 gap-1 text-slate-500"
+                  onClick={() => setStatsRange({ from: "", to: "" })}
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Clear
+                </Button>
+              )}
+            </div>
+          </motion.div>
+
           <motion.div
             variants={staggerChild}
             className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
@@ -194,7 +249,7 @@ export function SellerDetail({ id }: { id: number }) {
             <StatCard
               accent="amber"
               icon={Zap}
-              label="USD Supplied"
+              label={hasRangeFilter ? "USD Supplied in Range" : "USD Supplied"}
               value={totalUsdSupplied}
               format={(n) => usd(n)}
               footer={
@@ -207,7 +262,7 @@ export function SellerDetail({ id }: { id: number }) {
             <StatCard
               accent="emerald"
               icon={ArrowUpRight}
-              label="USDT Settled"
+              label={hasRangeFilter ? "USDT Settled in Range" : "USDT Settled"}
               value={totalUsdtSettled}
               format={(n) => usdt(n)}
               footer={

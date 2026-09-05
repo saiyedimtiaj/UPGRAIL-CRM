@@ -19,7 +19,7 @@ const PROFIT_STATUS_META: Record<ProfitStatus, { label: string; className: strin
     className: "bg-emerald-50 text-emerald-700 border-emerald-200",
   },
   VOIDED: {
-    label: "VOIDED",
+    label: "DISPUTED",
     className: "bg-rose-50 text-rose-700 border-rose-200",
   },
 }

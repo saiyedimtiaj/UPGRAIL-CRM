@@ -48,6 +48,15 @@ export const useVoidTransaction = () => {
   })
 }
 
+export const useUnvoidTransaction = () => {
+  const qc = useQueryClient()
+  return useMutation({
+    mutationFn: ({ id, reason }: { id: number; reason: string }) =>
+      transactionsApi.unvoidTransaction(id, reason),
+    onSuccess: () => invalidateFinancials(qc),
+  })
+}
+
 export const useDeleteTransaction = () => {
   const qc = useQueryClient()
   return useMutation({

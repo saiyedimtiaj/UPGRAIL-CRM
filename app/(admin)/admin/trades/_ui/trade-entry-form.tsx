@@ -11,7 +11,7 @@ import { getErrorMessage } from "@/lib/handleError"
 import { todayISO } from "@/lib/date"
 import { useConfetti } from "@/hooks/use-confetti"
 import { findConduitUsdtRate, findRateValue } from "@/lib/calc/rates"
-import { Bdt } from "@/components/primitives/money"
+import { Rate } from "@/components/primitives/money"
 import { SectionCard } from "@/components/primitives/section-card"
 import { SubmitButton } from "@/components/primitives/submit-button"
 import { ClientCombobox } from "@/components/primitives/client-combobox"
@@ -164,7 +164,7 @@ export function TradeEntryForm() {
               {selectedSeller.isSettlementConduit && (
                 <span className="font-mono text-[11px] text-slate-500">
                   Today&rsquo;s Conduit USDT Rate:{" "}
-                  <Bdt value={conduitUsdtRate} />
+                  <Rate value={conduitUsdtRate} />
                 </span>
               )}
             </div>

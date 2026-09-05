@@ -36,6 +36,17 @@ import type { AllocationOverride } from "@/services/settlements.api"
  */
 type SettlementMode = "supplier" | "transfer"
 
+/**
+ * A seller's USDT balance can be positive (owed), zero (paid), or negative
+ * (they hold credit from an over-settlement) — never shown as a raw negative
+ * number, which reads as an error rather than an advance.
+ */
+function usdtDueLabel(balance: number): string {
+  if (balance > 0) return `${balance.toLocaleString()} USDT owed`
+  if (balance < 0) return `${Math.abs(balance).toLocaleString()} USDT advance`
+  return "Paid"
+}
+
 export function SettlementForm() {
   const router = useRouter()
   const [mode, setMode] = React.useState<SettlementMode>("supplier")
@@ -253,7 +264,7 @@ export function SettlementForm() {
             options={externalSellers.map((s) => ({
               value: s.id,
               label: `${s.flag} ${s.name}`,
-              sublabel: `${(sellerUsdtDues[s.id] ?? 0).toLocaleString()} USDT owed`,
+              sublabel: usdtDueLabel(sellerUsdtDues[s.id] ?? 0),
             }))}
           />
         </div>
@@ -288,28 +299,42 @@ export function SettlementForm() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="settlement-payer">
+          <Label htmlFor={isTransfer ? "settlement-payer" : undefined}>
             {isTransfer ? "Seller Taking It Over" : "Fronted By"}
           </Label>
-          <SearchableSelect
-            id="settlement-payer"
-            value={effectivePayerId}
-            onChange={setPayerId}
-            options={(isTransfer
-              ? externalSellers.filter((s) => s.id !== effectiveSellerId)
-              : sellers
-            ).map((s) => ({
-              value: s.id,
-              label: `${s.flag ?? ""} ${s.name}`.trim(),
-              sublabel: isTransfer
-                ? `Will owe ${(sellerUsdtDues[s.id] ?? 0).toLocaleString()} USDT + this`
-                : s.isSettlementConduit
-                  ? "Settlement conduit"
-                  : "Fronting on the business's behalf",
-            }))}
-            searchPlaceholder="Search sellers..."
-            placeholder="Select who paid"
-          />
+          {isTransfer ? (
+            <SearchableSelect
+              id="settlement-payer"
+              value={effectivePayerId}
+              onChange={setPayerId}
+              options={externalSellers
+                .filter((s) => s.id !== effectiveSellerId)
+                .map((s) => ({
+                  value: s.id,
+                  label: `${s.flag ?? ""} ${s.name}`.trim(),
+                  sublabel: `Currently ${usdtDueLabel(sellerUsdtDues[s.id] ?? 0).toLowerCase()}, plus this`,
+                }))}
+              searchPlaceholder="Search sellers..."
+              placeholder="Select who paid"
+            />
+          ) : (
+            // Always the settlement conduit — a supplier settlement is BDT
+            // paid on the business's behalf, and there is only ever one
+            // conduit at a time, so this has nothing to actually choose.
+            <div className="flex h-10 items-center gap-2 rounded-lg border border-input bg-input/30 px-3 text-sm">
+              {conduitSeller ? (
+                <>
+                  <span>{conduitSeller.flag}</span>
+                  <span className="font-medium text-slate-700">{conduitSeller.name}</span>
+                  <span className="ml-auto text-[11px] font-semibold text-slate-400 uppercase">
+                    Settlement conduit
+                  </span>
+                </>
+              ) : (
+                <span className="text-slate-400">No settlement conduit configured</span>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="space-y-1.5">

@@ -90,12 +90,26 @@ export function ClientsTable() {
       key: "totalDue",
       header: "Total Due",
       align: "right",
-      cell: (c) => (
-        <Bdt
-          value={overdueByClient[c.id]?.total_due ?? clientDues[c.id] ?? 0}
-          className="font-semibold"
-        />
-      ),
+      cell: (c) => {
+        const due = overdueByClient[c.id]?.total_due ?? clientDues[c.id] ?? 0
+        // A negative balance is credit, not a debt — the Advance column is
+        // where that shows up, so Due reads 0 rather than a negative figure.
+        return <Bdt value={Math.max(due, 0)} className="font-semibold" />
+      },
+    },
+    {
+      key: "advance",
+      header: "Advance",
+      align: "right",
+      cell: (c) => {
+        const due = overdueByClient[c.id]?.total_due ?? clientDues[c.id] ?? 0
+        const advance = due < 0 ? -due : 0
+        return advance > 0 ? (
+          <Bdt value={advance} className="font-semibold text-sky-700" />
+        ) : (
+          <span className="text-slate-300">—</span>
+        )
+      },
     },
     {
       key: "lastTransaction",
@@ -113,9 +127,26 @@ export function ClientsTable() {
       header: "Status",
       cell: (c) => {
         const row = overdueByClient[c.id]
-        // Solid red once anything has gone past 48 hours unpaid, solid green
-        // when nothing is outstanding. Anything owed but still inside the
-        // window is neither — it is simply current.
+        const due = row?.total_due ?? clientDues[c.id] ?? 0
+
+        // A credit balance always reads as Advance, regardless of how old
+        // the last transaction is — there is nothing to be overdue on.
+        if (due < 0) {
+          return (
+            <span className="inline-flex items-center rounded-md bg-sky-600 px-2 py-0.5 text-[10px] font-bold tracking-wide text-white uppercase">
+              Advance
+            </span>
+          )
+        }
+        if (due === 0) {
+          return (
+            <span className="inline-flex items-center rounded-md bg-emerald-600 px-2 py-0.5 text-[10px] font-bold tracking-wide text-white uppercase">
+              Paid
+            </span>
+          )
+        }
+        // Owed and positive: red once anything has gone past 48 hours
+        // unpaid, otherwise it's simply due — still inside the grace window.
         if (row && row.overdue > 0) {
           return (
             <span className="inline-flex items-center rounded-md bg-rose-600 px-2 py-0.5 text-[10px] font-bold tracking-wide text-white uppercase">
@@ -123,16 +154,9 @@ export function ClientsTable() {
             </span>
           )
         }
-        if (!row || row.total_due <= 0) {
-          return (
-            <span className="inline-flex items-center rounded-md bg-emerald-600 px-2 py-0.5 text-[10px] font-bold tracking-wide text-white uppercase">
-              Paid
-            </span>
-          )
-        }
         return (
           <span className="inline-flex items-center rounded-md bg-amber-100 px-2 py-0.5 text-[10px] font-bold tracking-wide text-amber-800 uppercase">
-            Current
+            Due
           </span>
         )
       },
