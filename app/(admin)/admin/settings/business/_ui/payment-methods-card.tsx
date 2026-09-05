@@ -5,7 +5,6 @@ import { toast } from "sonner"
 import { Plus, X } from "lucide-react"
 
 import type { BusinessSettings } from "@/lib/types"
-import { useMe } from "@/features/use-auth"
 import { useSettings, useUpdateSettings } from "@/features/use-settings"
 import { getErrorMessage } from "@/lib/handleError"
 import { SectionCard } from "@/components/primitives/section-card"
@@ -15,6 +14,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { SubmitButton } from "@/components/primitives/submit-button"
+import { usePermissions } from "@/hooks/use-permission"
 
 function PaymentMethodsForm({ settings, isOwner }: { settings: BusinessSettings; isOwner: boolean }) {
   const updateSettings = useUpdateSettings()
@@ -131,9 +131,9 @@ function PaymentMethodsForm({ settings, isOwner }: { settings: BusinessSettings;
 
 
 export function PaymentMethodsCard() {
-  const { data: me } = useMe()
   const { data: settings, isPending } = useSettings()
-  const isOwner = me?.role.name === "OWNER"
+  const { can } = usePermissions()
+  const isOwner = can("settings.business")
 
   return (
     <SectionCard

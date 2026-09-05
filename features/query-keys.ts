@@ -13,6 +13,8 @@ export const QK = {
   metrics: "metrics",
   balances: "balances",
   settings: "settings",
+  statements: "statements",
+  roles: "roles",
 } as const
 
 export function invalidateFinancials(queryClient: QueryClient) {

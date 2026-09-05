@@ -5,7 +5,6 @@ import { toast } from "sonner"
 
 import { shortDate } from "@/lib/date"
 import { useTransfers, useVoidTransfer } from "@/features/use-transfers"
-import { useMe } from "@/features/use-auth"
 import { getErrorMessage } from "@/lib/handleError"
 import { PAGE_SIZE } from "@/lib/pagination"
 import { SectionCard } from "@/components/primitives/section-card"
@@ -19,6 +18,7 @@ import { RowActions } from "@/components/shared/row-actions"
 import { ConfirmDialog } from "@/components/primitives/confirm-dialog"
 import { BdtSigned } from "@/components/primitives/money"
 import type { MoneyTransfer } from "@/lib/types"
+import { usePermissions } from "@/hooks/use-permission"
 
 const DESTINATION_LABEL: Record<string, string> = {
   NAZMUL: "Nazmul",
@@ -68,7 +68,6 @@ export function WithdrawalHistory() {
   // so "showing 1-25 of 60" could sit above three visible rows. Fetch the
   // set, filter, then paginate what is left, so the two agree.
   const { data, isPending } = useTransfers({ page: 1, limit: 500, ...query })
-  const { data: me } = useMe()
   const voidTransfer = useVoidTransfer()
 
   const profitBankTransfers = (data?.data ?? []).filter(
@@ -113,7 +112,8 @@ export function WithdrawalHistory() {
   )
   const [voidTarget, setVoidTarget] = React.useState<MoneyTransfer | null>(null)
 
-  const canManage = me?.role.name === "OWNER" || me?.role.name === "PARTNER"
+  const { can } = usePermissions()
+  const canManage = can("profit.edit")
 
   const columns: DataTableColumn<MoneyTransfer>[] = [
     {

@@ -1,6 +1,7 @@
 
 
-export type UserRole = "OWNER" | "PARTNER" | "STAFF"
+/** Kept as a string: roles are created by admins at runtime. */
+export type UserRole = string
 
 export interface User {
   id: number

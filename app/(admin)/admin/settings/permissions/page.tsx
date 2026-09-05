@@ -1,9 +1,9 @@
-import { ProfitVisibilityCard } from "./_ui/profit-visibility-card"
+import { RolesManager } from "./_ui/roles-manager"
 
 export default function PermissionsSettingsPage() {
   return (
     <div className="space-y-6">
-      <ProfitVisibilityCard />
+      <RolesManager />
     </div>
   )
 }

@@ -6,7 +6,6 @@ import { toast } from "sonner"
 import { useTransactions, useVoidTransaction, useDeleteTransaction } from "@/features/use-transactions"
 import { useActiveClients } from "@/features/use-clients"
 import { useActiveSellers } from "@/features/use-sellers"
-import { useMe } from "@/features/use-auth"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { getErrorMessage } from "@/lib/handleError"
 import { timeOnly } from "@/lib/date"
@@ -20,6 +19,7 @@ import { ProfitStatusBadge } from "@/components/primitives/profit-status-badge"
 import { Bdt, Usd, Usdt } from "@/components/primitives/money"
 import { ConfirmDialog } from "@/components/primitives/confirm-dialog"
 import type { Transaction } from "@/lib/types"
+import { usePermissions } from "@/hooks/use-permission"
 import { EditTransactionModal } from "./edit-transaction-modal"
 import {
   TradesFilters,
@@ -55,7 +55,6 @@ export function TradesTable() {
   })
   const { data: clients = [] } = useActiveClients()
   const { data: sellers = [] } = useActiveSellers()
-  const { data: me } = useMe()
   const voidTransaction = useVoidTransaction()
   const deleteTransaction = useDeleteTransaction()
   const [voidTarget, setVoidTarget] = React.useState<Transaction | null>(null)
@@ -64,7 +63,8 @@ export function TradesTable() {
     null
   )
 
-  const canManage = me?.role.name === "OWNER" || me?.role.name === "PARTNER"
+  const { can } = usePermissions()
+  const canManage = can("trades.edit")
   const trades = txData?.data ?? []
 
   function handleFiltersChange(next: TradesFiltersState) {

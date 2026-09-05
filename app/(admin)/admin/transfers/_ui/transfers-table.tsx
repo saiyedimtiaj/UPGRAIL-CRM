@@ -5,7 +5,6 @@ import { toast } from "sonner"
 
 import { shortDate } from "@/lib/date"
 import { useTransfers, useVoidTransfer } from "@/features/use-transfers"
-import { useMe } from "@/features/use-auth"
 import { getErrorMessage } from "@/lib/handleError"
 import { PAGE_SIZE, toDataTablePagination } from "@/lib/pagination"
 import { SectionCard } from "@/components/primitives/section-card"
@@ -23,6 +22,7 @@ import { Modal } from "@/components/primitives/modal"
 import { Button } from "@/components/ui/button"
 import { TransferForm } from "@/app/(admin)/admin/transfers/_ui/transfer-form"
 import type { MoneyDestination, MoneyTransfer } from "@/lib/types"
+import { usePermissions } from "@/hooks/use-permission"
 import { ArrowRightLeftIcon, PlusIcon } from "lucide-react"
 
 const DESTINATION_LABEL: Record<string, string> = {
@@ -109,12 +109,12 @@ export function TransfersTable() {
   ]
 
   const { data, isPending } = useTransfers({ page, limit: PAGE_SIZE, ...query })
-  const { data: me } = useMe()
   const voidTransfer = useVoidTransfer()
   const transfers = data?.data ?? []
   const [voidTarget, setVoidTarget] = React.useState<MoneyTransfer | null>(null)
 
-  const canManage = me?.role.name === "OWNER" || me?.role.name === "PARTNER"
+  const { can } = usePermissions()
+  const canManage = can("transfers.edit")
 
   const columns: DataTableColumn<MoneyTransfer>[] = [
     {

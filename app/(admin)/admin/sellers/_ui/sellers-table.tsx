@@ -8,7 +8,6 @@ import { Eye, Plus, ShieldCheck } from "lucide-react"
 
 import { useSellers, useDeleteSeller, useSetSettlementConduit } from "@/features/use-sellers"
 import { useBalances } from "@/features/use-analytics"
-import { useMe } from "@/features/use-auth"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { getErrorMessage } from "@/lib/handleError"
 import { shortDate } from "@/lib/date"
@@ -25,6 +24,7 @@ import { ActivePill } from "@/components/primitives/active-pill"
 import { SellerKindPill } from "@/components/primitives/seller-kind-pill"
 import { AddSellerModal } from "@/components/shared/add-seller-modal"
 import type { Seller } from "@/lib/types"
+import { usePermissions } from "@/hooks/use-permission"
 import {
   SellersFilters,
   type SellersFiltersState,
@@ -46,7 +46,6 @@ export function SellersTable() {
     rateType: filters.rateType === "all" ? undefined : filters.rateType,
   })
   const { data: balancesData } = useBalances()
-  const { data: me } = useMe()
   const deleteSeller = useDeleteSeller()
   const setConduit = useSetSettlementConduit()
 
@@ -62,8 +61,9 @@ export function SellersTable() {
   const [deleteTarget, setDeleteTarget] = React.useState<Seller | null>(null)
   const [conduitTarget, setConduitTarget] = React.useState<Seller | null>(null)
 
-  const canManage = me?.role.name === "OWNER" || me?.role.name === "PARTNER"
-  const isOwner = me?.role.name === "OWNER"
+  const { can } = usePermissions()
+  const canManage = can("sellers.edit")
+  const isOwner = can("sellers.set_conduit")
 
   function handleFiltersChange(next: SellersFiltersState) {
     setFilters(next)

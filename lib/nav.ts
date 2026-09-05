@@ -9,6 +9,7 @@ import {
   Landmark,
   LayoutDashboard,
   Percent,
+  Receipt,
   Settings,
   ShieldAlert,
   Users,
@@ -21,6 +22,10 @@ export interface NavItem {
   label: string
   icon: LucideIcon
 }
+
+/** Nav items carry no permission of their own — ROUTE_PERMISSIONS in
+ *  lib/route-permissions.ts is the single source, so the sidebar and the page
+ *  guard can never disagree about what is visible. */
 
 export interface NavSection {
   label: string
@@ -58,6 +63,11 @@ export const NAV_SECTIONS: NavSection[] = [
     label: "Finance",
     items: [
       { href: "/admin/client-ledger", label: "Client Ledgers", icon: Landmark },
+      {
+        href: "/admin/client-statements",
+        label: "Client Statements",
+        icon: Receipt,
+      },
       { href: "/admin/seller-ledger", label: "Seller Ledgers", icon: Building2 },
       { href: "/admin/payments", label: "Payments", icon: Coins },
       { href: "/admin/settlements", label: "Settlements", icon: Coins },
@@ -77,7 +87,9 @@ export const NAV_SECTIONS: NavSection[] = [
 export const NAV_ITEMS: NavItem[] = NAV_SECTIONS.flatMap((s) => s.items)
 
 export const SETTINGS_NAV_ITEM: NavItem = {
-  href: "/admin/settings",
+  // Lands on a real page rather than an overview: Team is where settings work
+  // actually starts.
+  href: "/admin/settings/team",
   label: "Settings",
   icon: Settings,
 }
@@ -122,6 +134,10 @@ export const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   "/admin/client-ledger": {
     title: "Client Ledgers",
     subtitle: "Receivables, Running Dues & Payment Inflows",
+  },
+  "/admin/client-statements": {
+    title: "Client Daily Statements",
+    subtitle: "Opening, Charges & Closing — Sent to Clients on Telegram",
   },
   "/admin/seller-ledger": {
     title: "Seller Ledgers",
@@ -176,6 +192,12 @@ export function resolvePageMeta(pathname: string): { title: string; subtitle: st
       const dynamic = DYNAMIC_PAGE_META[parent]
       if (dynamic) return dynamic
     }
+
+    // A named sub-page inherits its parent's heading rather than falling all
+    // the way back to the Dashboard — which is what every settings tab used
+    // to show.
+    const inherited = PAGE_META[parent]
+    if (inherited) return inherited
   }
 
   return PAGE_META["/admin"]

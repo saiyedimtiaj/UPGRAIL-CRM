@@ -6,7 +6,6 @@ import { toast } from "sonner"
 import { shortDate } from "@/lib/date"
 import { useSettlements, useVoidSettlement } from "@/features/use-settlements"
 import { useActiveSellers } from "@/features/use-sellers"
-import { useMe } from "@/features/use-auth"
 import { getErrorMessage } from "@/lib/handleError"
 import { PAGE_SIZE, toDataTablePagination } from "@/lib/pagination"
 import { SectionCard } from "@/components/primitives/section-card"
@@ -21,6 +20,7 @@ import { ConfirmDialog } from "@/components/primitives/confirm-dialog"
 import { StatusBadge } from "@/components/primitives/status-badge"
 import { Bdt, Usdt } from "@/components/primitives/money"
 import type { USDTSettlement } from "@/lib/types"
+import { usePermissions } from "@/hooks/use-permission"
 import { EditSettlementModal } from "./edit-settlement-modal"
 
 
@@ -103,7 +103,6 @@ export function SettlementsTable() {
     { kind: "date", key: "dateFrom", label: "Date From" },
     { kind: "date", key: "dateTo", label: "Date To" },
   ]
-  const { data: me } = useMe()
   const voidSettlement = useVoidSettlement()
   const settlements = data?.data ?? []
   const [editTarget, setEditTarget] = React.useState<USDTSettlement | null>(
@@ -113,7 +112,8 @@ export function SettlementsTable() {
     null
   )
 
-  const canManage = me?.role.name === "OWNER" || me?.role.name === "PARTNER"
+  const { can } = usePermissions()
+  const canManage = can("settlements.edit")
 
   const columns: DataTableColumn<USDTSettlement>[] = [
     {

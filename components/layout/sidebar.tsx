@@ -9,6 +9,8 @@ import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import { NAV_INDICATOR_ID } from "@/lib/animations"
 import { SETTINGS_NAV_ITEM } from "@/lib/nav"
+import { usePermissions } from "@/hooks/use-permission"
+import { SETTINGS_TABS } from "@/app/(admin)/admin/settings/_ui/settings-nav"
 import { useLogout, useMe } from "@/features/use-auth"
 import { SidebarNav } from "@/components/layout/sidebar-nav"
 import { AvatarImage } from "@/components/primitives/avatar-image"
@@ -20,7 +22,14 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const logoutMutation = useLogout()
   const router = useRouter()
   const pathname = usePathname()
-  const isSettingsActive = pathname.startsWith(SETTINGS_NAV_ITEM.href)
+  const isSettingsActive = pathname.startsWith("/admin/settings")
+  const { can, isPending: permsPending } = usePermissions()
+  // The Settings entry itself is hidden — not just its own tabs — for a role
+  // that cannot open any of them, matching how every other item disappears
+  // rather than leading to a denied screen.
+  const canOpenSettings =
+    !permsPending &&
+    SETTINGS_TABS.some((tab) => !tab.permission || can(tab.permission))
 
   async function handleLogout() {
     try {
@@ -59,6 +68,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
           <SidebarNav onNavigate={onNavigate} />
         </div>
 
+        {canOpenSettings && (
         <div className="mb-3 pt-2">
           <Link
             href={SETTINGS_NAV_ITEM.href}
@@ -88,6 +98,7 @@ export function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
             </span>
           </Link>
         </div>
+        )}
       </div>
 
       <div className="border-t border-white/5 pt-4 lg:sticky lg:bottom-0 lg:z-10 lg:bg-brand-ink lg:p-4 lg:pt-4">

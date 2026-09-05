@@ -8,6 +8,7 @@ import type { TAdminUser } from "@/services/users.api"
 import { useCreateUser, useUpdateUser } from "@/features/use-users"
 import { getErrorMessage } from "@/lib/handleError"
 import { Modal } from "@/components/primitives/modal"
+import { useRoles } from "@/features/use-roles"
 import { SelectField } from "@/components/primitives/select-field"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -30,6 +31,7 @@ function UserForm({
   const [email, setEmail] = React.useState(initial?.email ?? "")
   const [password, setPassword] = React.useState("")
   const [contact, setContact] = React.useState(initial?.contact ?? "")
+  const { data: roles = [] } = useRoles()
   const [role, setRole] = React.useState<UserRole>(initial?.role.name ?? "STAFF")
 
   const isPending = createUser.isPending || updateUser.isPending
@@ -111,11 +113,9 @@ function UserForm({
           id="user-role"
           value={role}
           onChange={(v) => setRole(v as UserRole)}
-          options={[
-            { value: "OWNER", label: "Owner" },
-            { value: "PARTNER", label: "Partner" },
-            { value: "STAFF", label: "Staff" },
-          ]}
+          // Fetched, not hardcoded: a role an admin created must be
+          // assignable without a code change.
+          options={roles.map((r) => ({ value: r.name, label: r.label }))}
         />
       </div>
       <SubmitButton

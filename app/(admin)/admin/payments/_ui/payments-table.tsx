@@ -7,7 +7,6 @@ import { Plus } from "lucide-react"
 import { usePayments, useDeletePayment } from "@/features/use-payments"
 import { useActiveClients } from "@/features/use-clients"
 import { useActiveSellers } from "@/features/use-sellers"
-import { useMe } from "@/features/use-auth"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { getErrorMessage } from "@/lib/handleError"
 import { shortDate } from "@/lib/date"
@@ -23,6 +22,7 @@ import { Button } from "@/components/ui/button"
 import { BdtSigned } from "@/components/primitives/money"
 import { LogPaymentModal } from "@/components/shared/log-payment-modal"
 import type { MoneyDestination, Payment } from "@/lib/types"
+import { usePermissions } from "@/hooks/use-permission"
 import {
   PaymentsFilters,
   type PaymentsFiltersState,
@@ -58,7 +58,6 @@ export function PaymentsTable() {
   })
   const { data: clients = [] } = useActiveClients()
   const { data: sellers = [] } = useActiveSellers()
-  const { data: me } = useMe()
   const deletePayment = useDeletePayment()
 
   const payments = data?.data ?? []
@@ -67,7 +66,8 @@ export function PaymentsTable() {
   const [editTarget, setEditTarget] = React.useState<Payment | null>(null)
   const [deleteTarget, setDeleteTarget] = React.useState<Payment | null>(null)
 
-  const canManage = me?.role.name === "OWNER" || me?.role.name === "PARTNER"
+  const { can } = usePermissions()
+  const canManage = can("payments.edit")
 
   function handleFiltersChange(next: PaymentsFiltersState) {
     setFilters(next)

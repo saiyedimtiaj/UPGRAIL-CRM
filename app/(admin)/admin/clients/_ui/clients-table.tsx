@@ -8,7 +8,6 @@ import { Eye, Plus } from "lucide-react"
 
 import { useClients, useDeleteClient } from "@/features/use-clients"
 import { useBalances, useClientsOverdue } from "@/features/use-analytics"
-import { useMe } from "@/features/use-auth"
 import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { getErrorMessage } from "@/lib/handleError"
 import { shortDate } from "@/lib/date"
@@ -23,6 +22,7 @@ import { Button } from "@/components/ui/button"
 import { Bdt } from "@/components/primitives/money"
 import { AddClientModal } from "@/components/shared/add-client-modal"
 import type { Client } from "@/lib/types"
+import { usePermissions } from "@/hooks/use-permission"
 import {
   ClientsFilters,
   type ClientsFiltersState,
@@ -43,7 +43,6 @@ export function ClientsTable() {
     active: filters.active === "all" ? undefined : filters.active === "true",
   })
   const { data: balancesData } = useBalances()
-  const { data: me } = useMe()
   const deleteClient = useDeleteClient()
 
   const clients = data?.data ?? []
@@ -60,7 +59,8 @@ export function ClientsTable() {
   const [editTarget, setEditTarget] = React.useState<Client | null>(null)
   const [deleteTarget, setDeleteTarget] = React.useState<Client | null>(null)
 
-  const canManage = me?.role.name === "OWNER" || me?.role.name === "PARTNER"
+  const { can } = usePermissions()
+  const canManage = can("clients.edit")
 
   function handleFiltersChange(next: ClientsFiltersState) {
     setFilters(next)

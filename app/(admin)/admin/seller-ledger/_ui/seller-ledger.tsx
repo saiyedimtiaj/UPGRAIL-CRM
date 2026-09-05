@@ -18,7 +18,6 @@ import { useTransactions } from "@/features/use-transactions"
 import { useSettlements, useVoidSettlement } from "@/features/use-settlements"
 import { usePayments, useDeletePayment } from "@/features/use-payments"
 import { useBalances } from "@/features/use-analytics"
-import { useMe } from "@/features/use-auth"
 import { getErrorMessage } from "@/lib/handleError"
 import { SectionCard } from "@/components/primitives/section-card"
 import { PartyListItem } from "@/components/primitives/party-list-item"
@@ -38,6 +37,7 @@ import { LogSettlementModal } from "@/app/(admin)/admin/seller-ledger/_ui/log-se
 import { AddSellerModal } from "@/components/shared/add-seller-modal"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { Payment, Seller, USDTSettlement } from "@/lib/types"
+import { usePermissions } from "@/hooks/use-permission"
 
 type SellerFilter = "all" | "conduit" | "external"
 
@@ -64,7 +64,6 @@ export function SellerLedger() {
   const { data: balances } = useBalances()
   const sellerUsdtDues = balances?.sellerUsdtDues ?? {}
   const nazmulDue = balances?.nazmulDue ?? 0
-  const { data: me } = useMe()
   const deletePayment = useDeletePayment()
   const voidSettlement = useVoidSettlement()
 
@@ -87,7 +86,8 @@ export function SellerLedger() {
   const [voidSettlementTarget, setVoidSettlementTarget] =
     React.useState<USDTSettlement | null>(null)
 
-  const canManage = me?.role.name === "OWNER" || me?.role.name === "PARTNER"
+  const { can } = usePermissions()
+  const canManage = can("seller_ledger.edit")
 
   const filteredSellers = sellers
     .filter(

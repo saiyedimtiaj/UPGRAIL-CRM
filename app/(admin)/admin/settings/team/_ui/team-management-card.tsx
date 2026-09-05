@@ -4,7 +4,6 @@ import * as React from "react"
 import { toast } from "sonner"
 import { Plus } from "lucide-react"
 
-import { useMe } from "@/features/use-auth"
 import { useDeleteUser, useUsers } from "@/features/use-users"
 import type { TAdminUser } from "@/services/users.api"
 import { getErrorMessage } from "@/lib/handleError"
@@ -14,11 +13,11 @@ import { RowActions } from "@/components/shared/row-actions"
 import { ConfirmDialog } from "@/components/primitives/confirm-dialog"
 import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
+import { usePermissions } from "@/hooks/use-permission"
 import { EditUserModal } from "./edit-user-modal"
 
 
 export function TeamManagementCard() {
-  const { data: me } = useMe()
   const { data: usersPage, isPending } = useUsers({ limit: 100 })
   const deleteUser = useDeleteUser()
 
@@ -26,7 +25,8 @@ export function TeamManagementCard() {
   const [editTarget, setEditTarget] = React.useState<TAdminUser | null>(null)
   const [deleteTarget, setDeleteTarget] = React.useState<TAdminUser | null>(null)
 
-  const isOwner = me?.role.name === "OWNER"
+  const { can } = usePermissions()
+  const isOwner = can("settings.team")
   const users = usersPage?.data ?? []
   const ownerCount = users.filter((u) => u.role.name === "OWNER").length
 

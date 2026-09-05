@@ -2,7 +2,9 @@
 
 export interface TRole {
   id: number
-  name: "OWNER" | "PARTNER" | "STAFF"
+  /** Roles are admin-created now, so this is any stable identifier, not a
+   *  fixed union. Code should check permissions, never a role name. */
+  name: string
   label: string
 }
 
@@ -15,6 +17,10 @@ export interface TUser {
   tag: string | null
   canViewProfit: boolean
   role: TRole
+  /** Permission keys this user's role holds. Empty for an owner. */
+  permissions: string[]
+  /** Owners hold every permission implicitly, including future ones. */
+  isOwner: boolean
 }
 
 export interface AuthResponse {

@@ -4,7 +4,6 @@ import * as React from "react"
 import { toast } from "sonner"
 
 import type { BusinessSettings } from "@/lib/types"
-import { useMe } from "@/features/use-auth"
 import { useSettings, useUpdateSettings } from "@/features/use-settings"
 import { getErrorMessage } from "@/lib/handleError"
 import { SectionCard } from "@/components/primitives/section-card"
@@ -12,6 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { SubmitButton } from "@/components/primitives/submit-button"
+import { usePermissions } from "@/hooks/use-permission"
 
 
 function DashboardDisplayForm({ settings, isOwner }: { settings: BusinessSettings; isOwner: boolean }) {
@@ -95,9 +95,9 @@ function DashboardDisplayForm({ settings, isOwner }: { settings: BusinessSetting
 
 
 export function DashboardDisplayCard() {
-  const { data: me } = useMe()
   const { data: settings, isPending } = useSettings()
-  const isOwner = me?.role.name === "OWNER"
+  const { can } = usePermissions()
+  const isOwner = can("settings.business")
 
   return (
     <SectionCard

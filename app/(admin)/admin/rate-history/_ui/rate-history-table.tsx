@@ -6,7 +6,6 @@ import { toast } from "sonner"
 import { useRateHistory, useDeleteRate } from "@/features/use-rates"
 import { useActiveClients } from "@/features/use-clients"
 import { useActiveSellers } from "@/features/use-sellers"
-import { useMe } from "@/features/use-auth"
 import { getErrorMessage } from "@/lib/handleError"
 import { shortDate, shortDateTime } from "@/lib/date"
 import { PAGE_SIZE, toDataTablePagination } from "@/lib/pagination"
@@ -18,6 +17,7 @@ import { RowActions } from "@/components/shared/row-actions"
 import { ConfirmDialog } from "@/components/primitives/confirm-dialog"
 import { Bdt } from "@/components/primitives/money"
 import type { DailyRate } from "@/lib/types"
+import { usePermissions } from "@/hooks/use-permission"
 import { EditRateModal } from "./edit-rate-modal"
 import {
   RateHistoryFilters,
@@ -45,14 +45,14 @@ export function RateHistoryTable() {
   })
   const { data: clients = [] } = useActiveClients()
   const { data: sellers = [] } = useActiveSellers()
-  const { data: me } = useMe()
   const deleteRate = useDeleteRate()
   const [editTarget, setEditTarget] = React.useState<DailyRate | null>(null)
   const [deleteTarget, setDeleteTarget] = React.useState<DailyRate | null>(
     null
   )
 
-  const canManage = me?.role.name === "OWNER" || me?.role.name === "PARTNER"
+  const { can } = usePermissions()
+  const canManage = can("rates.edit")
   const rates = data?.data ?? []
 
   function handleFiltersChange(next: RateHistoryFiltersState) {

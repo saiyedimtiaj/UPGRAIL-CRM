@@ -17,7 +17,6 @@ import { useActiveClients } from "@/features/use-clients"
 import { useTransactions } from "@/features/use-transactions"
 import { usePayments, useDeletePayment } from "@/features/use-payments"
 import { useBalances } from "@/features/use-analytics"
-import { useMe } from "@/features/use-auth"
 import { getErrorMessage } from "@/lib/handleError"
 import { SectionCard } from "@/components/primitives/section-card"
 import { PartyListItem } from "@/components/primitives/party-list-item"
@@ -36,6 +35,7 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value"
 import { AddClientModal } from "@/components/shared/add-client-modal"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { ClientChargeStatus, Payment } from "@/lib/types"
+import { usePermissions } from "@/hooks/use-permission"
 
 const CHARGE_STATUS_TO_UI: Record<ClientChargeStatus, Status> = {
   AWAITING_CLIENT_RATE: "pending",
@@ -61,7 +61,6 @@ export function ClientLedger() {
   const { data: txData } = useTransactions({ limit: pageSize })
   const { data: paymentsData } = usePayments({ limit: pageSize })
   const { data: balances } = useBalances()
-  const { data: me } = useMe()
   const deletePayment = useDeletePayment()
 
   const transactions = txData?.data ?? []
@@ -113,7 +112,8 @@ export function ClientLedger() {
     if (timelinePage !== 1) setTimelinePage(1)
   }
 
-  const canManage = me?.role.name === "OWNER" || me?.role.name === "PARTNER"
+  const { can } = usePermissions()
+  const canManage = can("client_ledger.edit")
 
   const sortedClients = [...clients]
     .filter((c) => c.name.toLowerCase().includes(search.toLowerCase()))

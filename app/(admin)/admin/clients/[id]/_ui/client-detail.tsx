@@ -12,7 +12,6 @@ import { useClient, useUpdateClient, useDeleteClient } from "@/features/use-clie
 import { useTransactions } from "@/features/use-transactions"
 import { usePayments } from "@/features/use-payments"
 import { useBalances } from "@/features/use-analytics"
-import { useMe } from "@/features/use-auth"
 import { getErrorMessage } from "@/lib/handleError"
 import { shortDate } from "@/lib/date"
 import { bdt, usd } from "@/lib/format"
@@ -28,6 +27,7 @@ import { ConfirmDialog } from "@/components/primitives/confirm-dialog"
 import { AddClientModal } from "@/components/shared/add-client-modal"
 import { LogPaymentModal } from "@/components/shared/log-payment-modal"
 import { Button } from "@/components/ui/button"
+import { usePermissions } from "@/hooks/use-permission"
 import { ClientPaymentsCard } from "./client-payments-card"
 
 const TOTALS_LIMIT = 500
@@ -38,7 +38,6 @@ export function ClientDetail({ id }: { id: number }) {
 
   const { data: client, isPending, isError, error, refetch } = useClient(validId)
   const { data: balances } = useBalances()
-  const { data: me } = useMe()
   const updateClient = useUpdateClient()
   const deleteClient = useDeleteClient()
 
@@ -57,7 +56,8 @@ export function ClientDetail({ id }: { id: number }) {
   const [deactivateTarget, setDeactivateTarget] = React.useState<"deactivate" | "reactivate" | null>(null)
   const [removeOpen, setRemoveOpen] = React.useState(false)
 
-  const canManage = me?.role.name === "OWNER" || me?.role.name === "PARTNER"
+  const { can } = usePermissions()
+  const canManage = can("clients.edit")
 
   const notFound = validId === null || isNotFoundError(error)
 

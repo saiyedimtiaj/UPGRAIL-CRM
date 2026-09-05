@@ -1,10 +1,13 @@
 "use client"
 
+import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "motion/react"
 import { cn } from "@/lib/utils"
 import { NAV_INDICATOR_ID } from "@/lib/animations"
+import { usePermissions } from "@/hooks/use-permission"
+import { permissionForPath } from "@/lib/route-permissions"
 import { NAV_SECTIONS, type NavItem } from "@/lib/nav"
 
 function NavRow({
@@ -55,9 +58,26 @@ function NavRow({
 }
 
 export function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
+  const { can, isPending } = usePermissions()
+
+  // A page the role cannot open is not listed at all. Sections that end up
+  // empty drop their heading too, so no stray "Finance" label floats above
+  // nothing.
+  const sections = React.useMemo(() => {
+    if (isPending) return NAV_SECTIONS
+
+    return NAV_SECTIONS.map((section) => ({
+      ...section,
+      items: section.items.filter((item) => {
+        const permission = permissionForPath(item.href)
+        return !permission || can(permission)
+      }),
+    })).filter((section) => section.items.length > 0)
+  }, [can, isPending])
+
   return (
     <nav className="space-y-5">
-      {NAV_SECTIONS.map((section) => (
+      {sections.map((section) => (
         <div key={section.label} className="space-y-1">
           <p className="px-3 text-[11px] font-semibold tracking-wider text-zinc-500 uppercase">
             {section.label}

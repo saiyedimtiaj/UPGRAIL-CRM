@@ -1,25 +1,10 @@
-"use client"
-
-import { useMe } from "@/features/use-auth"
-import { LockScreen } from "@/components/primitives/lock-screen"
 import { ProfitMetrics } from "@/app/(admin)/admin/profit/_ui/profit-metrics"
 import { LiquidityWarning } from "@/app/(admin)/admin/profit/_ui/liquidity-warning"
 import { WithdrawalHistory } from "@/app/(admin)/admin/profit/_ui/withdrawal-history"
 
+// Access is enforced by RouteGuard via ROUTE_PERMISSIONS ("profit.view"), so
+// this page no longer carries its own role check.
 export default function ProfitPage() {
-  const { data: me } = useMe()
-
-  if (me?.role.name === "STAFF" && !me?.canViewProfit) {
-    return (
-      <div className="w-full p-4 sm:p-6">
-        <LockScreen
-          title="Profit Pool Access Restricted"
-          description="Your account does not have profit visibility enabled. Ask an owner or partner to grant access from Settings."
-        />
-      </div>
-    )
-  }
-
   return (
     <div className="w-full space-y-5 p-4 sm:space-y-6 sm:p-6">
       <ProfitMetrics />

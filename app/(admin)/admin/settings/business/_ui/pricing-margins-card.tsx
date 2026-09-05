@@ -5,7 +5,6 @@ import { toast } from "sonner"
 import { Percent } from "lucide-react"
 
 import type { BusinessSettings } from "@/lib/types"
-import { useMe } from "@/features/use-auth"
 import { useSettings, useUpdateSettings } from "@/features/use-settings"
 import { getErrorMessage } from "@/lib/handleError"
 import { SectionCard } from "@/components/primitives/section-card"
@@ -13,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { SubmitButton } from "@/components/primitives/submit-button"
+import { usePermissions } from "@/hooks/use-permission"
 
 function PricingMarginsForm({ settings, isOwner }: { settings: BusinessSettings; isOwner: boolean }) {
   const updateSettings = useUpdateSettings()
@@ -68,9 +68,9 @@ function PricingMarginsForm({ settings, isOwner }: { settings: BusinessSettings;
 
 
 export function PricingMarginsCard() {
-  const { data: me } = useMe()
   const { data: settings, isPending } = useSettings()
-  const isOwner = me?.role.name === "OWNER"
+  const { can } = usePermissions()
+  const isOwner = can("settings.business")
 
   return (
     <SectionCard
